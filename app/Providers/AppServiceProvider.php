@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Providers;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
+
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+
+
+public function boot(): void
+{
+    Paginator::useBootstrapFive();
+            // Email de réinitialisation du mot de passe, en français
+        ResetPassword::toMailUsing(function ($notifiable, string $token) {
+            $url = route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ]);
+
+            return (new MailMessage)
+                ->subject('AquaSecure — Réinitialisation de votre mot de passe')
+                ->greeting('Bonjour ' . $notifiable->nom . ',')
+                ->line('Vous avez demandé à réinitialiser le mot de passe de votre compte AquaSecure.')
+                ->action('Choisir un nouveau mot de passe', $url)
+                ->line('Ce lien expire dans ' . config('auth.passwords.users.expire') . ' minutes.')
+                ->line("Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email : votre mot de passe ne changera pas.")
+                ->salutation("L'équipe AquaSecure");
+        });
+}
+}
