@@ -33,6 +33,43 @@
         </div>
     @endforeach
 
+    {{-- Carte des zones : un clic sur une zone affiche ses réseaux d'eau --}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header flex-wrap gap-2">
+                <h3 class="card-title">Zones et réseaux d'eau</h3>
+                <div class="card-actions d-flex flex-wrap align-items-center gap-3">
+                    {{-- Légende remplie par carte-zones.js selon le mode --}}
+                    <div id="legende-zones" class="d-flex flex-wrap gap-3 small text-secondary"></div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Couleur des zones">
+                        <input type="radio" class="btn-check" name="mode-carte" id="mode-etat" value="etat" checked>
+                        <label class="btn" for="mode-etat">État</label>
+                        <input type="radio" class="btn-check" name="mode-carte" id="mode-risque" value="risque">
+                        <label class="btn" for="mode-risque">Risque</label>
+                        <input type="radio" class="btn-check" name="mode-carte" id="mode-groupe" value="groupe">
+                        <label class="btn" for="mode-groupe">Groupe</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-0">
+                <div class="col-lg-8">
+                    <div id="carte-zones" style="height: 420px"></div>
+                </div>
+                <div class="col-lg-4 border-start">
+                    <div class="card-body" id="panneau-zone" style="max-height: 420px; overflow-y: auto">
+                        <div class="text-center text-secondary py-5">
+                            <i class="ti ti-click mb-2" style="font-size: 2.5rem"></i>
+                            <p class="mb-0">Cliquez sur une zone de la carte pour voir ses réseaux d'eau.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Graphiques du parc (états, matériaux, âges, évolution) --}}
+    @include('admin.partials.graphiques-reseau')
+
     {{-- Carte des incidents --}}
     <div class="col-lg-7">
         <div class="card">
@@ -124,4 +161,26 @@
             }).addTo(map).bindPopup(`<b>${i.type}</b><br>${i.localite}<br>${i.statut}`);
         });
     </script>
+    <script src="{{ asset('js/analyse-ia.js') }}"></script>
+    <script src="{{ asset('js/carte-zones.js') }}"></script>
+    <script>
+        const carteDesZones = carteZones({
+            legende: 'legende-zones',
+            carte: 'carte-zones',
+            panneau: 'panneau-zone',
+            zones: @json($zonesCarte),
+            badges: { bon: 'bg-green-lt', degrade: 'bg-yellow-lt', hors_service: 'bg-red-lt' },
+            icones: { canalisation: 'ti ti-line', reservoir: 'ti ti-cylinder', station: 'ti ti-building-factory-2' },
+            lienReseau: @json(route('admin.reseaux.edit', '__ID__')),
+            lienZone: @json(route('admin.reseaux.index', ['zone' => '__ID__'])),
+            lienAnalyse: @json(route('admin.zones.analyse-ia', '__ID__')),
+        });
+        document.querySelectorAll('[name="mode-carte"]').forEach(bouton =>
+            bouton.addEventListener('change', () => carteDesZones.changerMode(bouton.value)));
+    </script>
+    <style>
+        .rapport-ia h2 { font-size: .95rem; margin-top: .75rem; margin-bottom: .35rem; }
+        .rapport-ia h2:first-child { margin-top: 0; }
+        .rapport-ia ul, .rapport-ia ol { padding-left: 1.1rem; margin-bottom: .5rem; }
+    </style>
 @endpush

@@ -19,5 +19,8 @@ public function run(): void
 
     // 10 citoyens fictifs pour tester la liste et la pagination
     User::factory(10)->create();
+
+    // Zones et réseaux d'eau de démonstration
+    $this->call(InfrastructureSeeder::class);
 }
 }

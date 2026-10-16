@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReseauEau;
+use App\Models\Zone;
+use App\Services\StatistiquesReseau;
 
 class DashboardController extends Controller
 {
@@ -12,7 +15,7 @@ class DashboardController extends Controller
         $stats = [
             ['libelle' => 'Incidents ouverts', 'valeur' => 12, 'icone' => 'alert-triangle', 'couleur' => 'red'],
             ['libelle' => 'Fuites signalées', 'valeur' => 7, 'icone' => 'droplet', 'couleur' => 'azure'],
-            ['libelle' => 'Infrastructures suivies', 'valeur' => 48, 'icone' => 'building-factory-2', 'couleur' => 'green'],
+            ['libelle' => 'Infrastructures suivies', 'valeur' => ReseauEau::count(), 'icone' => 'building-factory-2', 'couleur' => 'green'],
             ['libelle' => 'Projets en cours', 'valeur' => 3, 'icone' => 'coin', 'couleur' => 'orange'],
         ];
 
@@ -28,6 +31,12 @@ class DashboardController extends Controller
             ['date' => '12/10/2026', 'type' => 'coupure', 'localite' => 'Ben Arous', 'gravite' => 'faible', 'statut' => 'résolu', 'lat' => 36.7531, 'lng' => 10.2189],
         ];
 
-        return view('admin.dashboard', compact('stats', 'projets', 'incidents'));
+        // Carte des zones et de leurs réseaux d'eau
+        $zonesCarte = Zone::pourCarte();
+
+        // Graphiques du parc d'infrastructure
+        $statsReseau = StatistiquesReseau::calculer();
+
+        return view('admin.dashboard', compact('stats', 'projets', 'incidents', 'zonesCarte', 'statsReseau'));
     }
 }

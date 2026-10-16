@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\ReseauEauController;
+use App\Http\Controllers\Admin\ReseauImportController;
+use App\Http\Controllers\Admin\RisqueController;
+use App\Http\Controllers\Admin\ZoneController;
 use App\Http\Controllers\Auth\PasswordResetController;
 
 
@@ -50,12 +54,30 @@ Route::resource('users', UserController::class)
     ->except('show')
     ->middleware('role:admin');
 
+    // Infrastructure : zones et éléments du réseau d'eau
+    Route::resource('zones', ZoneController::class)->except('show');
+    Route::get('reseaux/import', [ReseauImportController::class, 'formulaire'])->name('reseaux.import');
+    Route::get('reseaux/import/modele', [ReseauImportController::class, 'modele'])->name('reseaux.import.modele');
+    Route::post('reseaux/import', [ReseauImportController::class, 'importer'])->name('reseaux.import.store');
+    Route::resource('reseaux', ReseauEauController::class)
+        ->except('show')
+        ->parameters(['reseaux' => 'reseau']);
+
+    // Intelligence artificielle : score de risque, groupes de zones (K-means) et rapport IA
+    Route::get('risques', [RisqueController::class, 'index'])->name('risques.index');
+    Route::get('risques/pdf', [RisqueController::class, 'pdf'])->name('risques.pdf');
+    Route::get('risques/plan', [RisqueController::class, 'plan'])->name('risques.plan');
+    Route::get('zones/{zone}/rapport-pdf', [RisqueController::class, 'rapportZonePdf'])
+        ->middleware('throttle:10,1')
+        ->name('zones.rapport-pdf');
+    Route::post('zones/{zone}/analyse-ia', [RisqueController::class, 'analyserZone'])
+        ->middleware('throttle:10,1')   // 10 analyses par minute au plus
+        ->name('zones.analyse-ia');
+
     // Pages provisoires : chaque ligne sera remplacée par un contrôleur CRUD
     // (ex : Route::resource('zones', ZoneController::class);)
     $modules = [
         // url             nom de route      titre                     section             icône           description
-        ['zones',          'zones',          'Zones',                  'Infrastructure',   'map',            'Découpage géographique du territoire desservi.'],
-        ['reseaux',        'reseaux',        'Réseaux',                'Infrastructure',   'share',          'Conduites, réservoirs et stations de pompage.'],
         ['incidents',      'incidents',      'Incidents',              'Exploitation',     'alert-triangle', 'Fuites, contaminations et coupures signalées.'],
         ['interventions',  'interventions',  'Interventions',          'Exploitation',     'tool',           'Équipes envoyées sur le terrain et suivi des réparations.'],
         ['capteurs',       'capteurs',       'Capteurs',               'Surveillance',     'wifi',           'Capteurs de pression, de débit et de qualité installés.'],

@@ -2,6 +2,7 @@
     Liste déroulante Tabler avec icône et états de validation.
     Exemple :
     <x-select name="role" label="Rôle" icon="shield" :options="\App\Models\User::ROLES" required />
+    Liste avec recherche : ajouter data-recherche (sans icon) et charger js/select-recherche.js.
 --}}
 @props([
     'name',
@@ -42,7 +43,16 @@
                 @if ($icon) style="padding-left: 2.5rem" @endif>
             <option value="">{{ $placeholder }}</option>
             @foreach ($options as $valeur => $libelle)
-                <option value="{{ $valeur }}" @selected($choisi === (string) $valeur)>{{ $libelle }}</option>
+                @if (is_array($libelle))
+                    {{-- Tableau imbriqué = groupe d'options : ['Groupe' => ['valeur' => 'Libellé', ...]] --}}
+                    <optgroup label="{{ $valeur }}">
+                        @foreach ($libelle as $sousValeur => $sousLibelle)
+                            <option value="{{ $sousValeur }}" @selected($choisi === (string) $sousValeur)>{{ $sousLibelle }}</option>
+                        @endforeach
+                    </optgroup>
+                @else
+                    <option value="{{ $valeur }}" @selected($choisi === (string) $valeur)>{{ $libelle }}</option>
+                @endif
             @endforeach
         </select>
     </div>
