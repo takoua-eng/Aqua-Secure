@@ -7,6 +7,7 @@
         'Infrastructure' => [
             ['admin.zones.index', 'map', 'Zones'],
             ['admin.reseaux.index', 'share', 'Réseaux'],
+            ['admin.risques.index', 'brain', 'Analyse des risques'],
         ],
         'Exploitation' => [
             ['admin.incidents.index', 'alert-triangle', 'Incidents'],

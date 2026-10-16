@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Zone;
 
 class HomeController extends Controller
 {
@@ -21,6 +22,9 @@ class HomeController extends Controller
             ['type' => 'coupure', 'localite' => 'Ben Arous', 'lat' => 36.7531, 'lng' => 10.2189],
         ];
 
-        return view('front.home', compact('projets', 'incidents'));
+        // Carte des zones et de leurs réseaux d'eau
+        $zonesCarte = Zone::pourCarte();
+
+        return view('front.home', compact('projets', 'incidents', 'zonesCarte'));
     }
 }
