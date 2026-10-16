@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ZoneRequest;
 use App\Models\Zone;
+use App\Services\QualiteEau;
 use Illuminate\Http\Request;
 
 class ZoneController extends Controller
@@ -24,7 +25,10 @@ class ZoneController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('admin.zones.index', compact('zones'));
+        // Taux de conformité de l'eau par zone (module Qualité de l'eau)
+        $qualite = QualiteEau::parZone();
+
+        return view('admin.zones.index', compact('zones', 'qualite'));
     }
 
     public function create()

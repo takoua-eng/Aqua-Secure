@@ -22,5 +22,6 @@ public function run(): void
 
     // Zones et réseaux d'eau de démonstration
     $this->call(InfrastructureSeeder::class);
+    $this->call(QualiteEauSeeder::class);
 }
 }

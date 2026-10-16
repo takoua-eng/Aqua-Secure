@@ -3,11 +3,15 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Front\HomeController;
+use App\Http\Controllers\Front\QualiteEauController;
 use App\Http\Controllers\Front\SignalementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\AnalyseQualiteController;
+use App\Http\Controllers\Admin\DetectionContaminationController;
+use App\Http\Controllers\Admin\PointPrelevementController;
 use App\Http\Controllers\Admin\ReseauEauController;
 use App\Http\Controllers\Admin\ReseauImportController;
 use App\Http\Controllers\Admin\RisqueController;
@@ -22,6 +26,12 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::middleware(['auth', 'role:citoyen'])->group(function () {
     Route::get('/signaler', [SignalementController::class, 'create'])->name('signalement.create');
     Route::post('/signaler', [SignalementController::class, 'store'])->name('signalement.store');
+});
+
+// Qualité de l'eau : consultation par les utilisateurs connectés (citoyens compris)
+Route::middleware('auth')->group(function () {
+    Route::get('/qualite-eau', [QualiteEauController::class, 'index'])->name('qualite.index');
+    Route::get('/qualite-eau/{point}', [QualiteEauController::class, 'show'])->name('qualite.show');
 });
 
 // ---------- Connexion des gestionnaires ----------
@@ -74,6 +84,21 @@ Route::resource('users', UserController::class)
         ->middleware('throttle:10,1')   // 10 analyses par minute au plus
         ->name('zones.analyse-ia');
 
+    // Qualité de l'eau : points de prélèvement et analyses de laboratoire
+    // (les routes fixes "carte" et "export" avant les resources, sinon elles seraient lues comme un {point} / {analyse})
+    Route::get('prelevements/carte', [PointPrelevementController::class, 'carte'])->name('prelevements.carte');
+    Route::resource('prelevements', PointPrelevementController::class)
+        ->parameters(['prelevements' => 'point']);
+    Route::get('analyses/export', [AnalyseQualiteController::class, 'export'])->name('analyses.export');
+    Route::get('analyses/{analyse}/pdf', [AnalyseQualiteController::class, 'pdf'])->name('analyses.pdf');
+    Route::resource('analyses', AnalyseQualiteController::class)
+        ->parameters(['analyses' => 'analyse']);
+    // Détection de contamination (modèle IA) : performances et réentraînement
+    Route::get('detection-contamination', [DetectionContaminationController::class, 'index'])->name('detection.index');
+    Route::post('detection-contamination/entrainer', [DetectionContaminationController::class, 'entrainer'])
+        ->middleware('throttle:10,1')
+        ->name('detection.entrainer');
+
     // Pages provisoires : chaque ligne sera remplacée par un contrôleur CRUD
     // (ex : Route::resource('zones', ZoneController::class);)
     $modules = [
@@ -82,8 +107,6 @@ Route::resource('users', UserController::class)
         ['interventions',  'interventions',  'Interventions',          'Exploitation',     'tool',           'Équipes envoyées sur le terrain et suivi des réparations.'],
         ['capteurs',       'capteurs',       'Capteurs',               'Surveillance',     'wifi',           'Capteurs de pression, de débit et de qualité installés.'],
         ['releves',        'releves',        'Relevés',                'Surveillance',     'chart-bar',      'Mesures transmises par les capteurs.'],
-        ['prelevements',   'prelevements',   'Points de prélèvement',  "Qualité de l'eau", 'droplet',        "Lieux où l'eau est prélevée pour analyse."],
-        ['analyses',       'analyses',       'Analyses',               "Qualité de l'eau", 'flask',          'Résultats des analyses (chlore, bactéries, turbidité…).'],
         ['projets',        'projets',        'Projets de rénovation',  'Rénovation',       'building',       'Projets de rénovation et de décontamination, budget et financement.'],
     ];
 

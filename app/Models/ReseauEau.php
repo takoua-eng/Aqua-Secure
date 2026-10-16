@@ -77,6 +77,12 @@ class ReseauEau extends Model
         return $this->hasMany(HistoriqueEtat::class)->latest()->latest('id');
     }
 
+    // RESEAU_EAU 1 — N POINT_PRELEVEMENT (module Qualité de l'eau)
+    public function pointsPrelevement(): HasMany
+    {
+        return $this->hasMany(PointPrelevement::class, 'reseau_id');
+    }
+
     public function libelleType(): string
     {
         return self::TYPES[$this->type] ?? $this->type;

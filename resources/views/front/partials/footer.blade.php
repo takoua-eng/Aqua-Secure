@@ -14,6 +14,9 @@
                 <h6 class="text-white">Liens</h6>
                 <ul class="list-unstyled small">
                     <li><a href="{{ route('home') }}">Accueil</a></li>
+                    @auth
+                        <li><a href="{{ route('qualite.index') }}">Qualité de l'eau</a></li>
+                    @endauth
 @auth
     @if (auth()->user()->isCitoyen())
         <li><a href="{{ route('signalement.create') }}">Signaler un incident</a></li>

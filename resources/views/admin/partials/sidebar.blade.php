@@ -20,6 +20,7 @@
         "Qualité de l'eau" => [
             ['admin.prelevements.index', 'droplet', 'Points de prélèvement'],
             ['admin.analyses.index', 'flask', 'Analyses'],
+            ['admin.detection.index', 'virus-search', 'Détection de contamination'],
         ],
         'Rénovation' => [
             ['admin.projets.index', 'building', 'Projets de rénovation'],
