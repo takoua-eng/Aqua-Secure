@@ -67,6 +67,9 @@
         </div>
     </div>
 
+    {{-- Qualité de l'eau : conformité du mois et points à surveiller --}}
+    @include('admin.partials.widgets-qualite')
+
     {{-- Graphiques du parc (états, matériaux, âges, évolution) --}}
     @include('admin.partials.graphiques-reseau')
 

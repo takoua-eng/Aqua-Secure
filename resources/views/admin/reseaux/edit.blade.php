@@ -70,6 +70,9 @@
         </div>
     </div>
 
+    {{-- Qualité de l'eau mesurée sur les points de prélèvement du réseau (module Qualité de l'eau) --}}
+    @include('admin.prelevements._qualite-reseau')
+
     {{-- Historique des états (rempli automatiquement à chaque changement d'état) --}}
     <div class="card mt-3">
         <div class="card-header">

@@ -71,6 +71,13 @@ class ReseauEauController extends Controller
 
     public function destroy(ReseauEau $reseau)
     {
+        // Un réseau qui a des points de prélèvement (qualité de l'eau) ne peut pas être supprimé
+        if ($reseau->pointsPrelevement()->exists()) {
+            return back()->withErrors([
+                'reseau' => "Le réseau {$reseau->code} a encore des points de prélèvement : supprimez-les ou rattachez-les à un autre réseau d'abord.",
+            ]);
+        }
+
         $reseau->delete();
 
         return redirect()->route('admin.reseaux.index')->with('success', 'Réseau supprimé.');

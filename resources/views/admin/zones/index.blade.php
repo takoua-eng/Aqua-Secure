@@ -31,6 +31,7 @@
                         <th>Commune</th>
                         <th>Population</th>
                         <th>Réseaux</th>
+                        <th>Qualité de l'eau</th>
                         <th>Créée le</th>
                         <th class="w-1"></th>
                     </tr>
@@ -52,6 +53,14 @@
                                    class="badge {{ $zone->reseaux_count ? 'bg-blue-lt' : 'bg-secondary-lt' }}">
                                     {{ $zone->reseaux_count }} réseau{{ $zone->reseaux_count > 1 ? 'x' : '' }}
                                 </a>
+                            </td>
+                            <td>
+                                {{-- Part des analyses conformes sur les points de la zone (module Qualité de l'eau) --}}
+                                @php $qualiteZone = $qualite[$zone->id] ?? null; @endphp
+                                <span class="badge bg-{{ \App\Models\PointPrelevement::couleurTaux($qualiteZone['taux'] ?? null) }}-lt"
+                                      title="{{ $qualiteZone ? $qualiteZone['total'] . ' analyse(s)' : 'Aucune analyse' }}">
+                                    {{ $qualiteZone ? number_format($qualiteZone['taux'], 1, ',', ' ') . ' % conforme' : '—' }}
+                                </span>
                             </td>
                             <td class="text-secondary">{{ $zone->created_at->format('d/m/Y') }}</td>
                             <td>
@@ -76,7 +85,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6">
+                            <td colspan="7">
                                 <div class="empty">
                                     <div class="empty-icon"><i class="ti ti-map" style="font-size: 3rem"></i></div>
                                     <p class="empty-title">Aucune zone trouvée</p>
