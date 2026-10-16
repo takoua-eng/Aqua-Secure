@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Administration') — AquaSecure</title>
-    @hasSection('subtitle')
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    
-    <div class="text-secondary mt-1">@yield('subtitle')</div>
-    @endif
 
     {{-- Tabler (back office) + icônes, chargés par CDN — couleurs d'origine du template --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1/dist/css/tabler.min.css">
@@ -104,6 +100,9 @@
                     <div class="col">
                         <div class="page-pretitle">@yield('pretitle', 'AquaSecure')</div>
                         <h2 class="page-title">@yield('title', 'Administration')</h2>
+                        @hasSection('subtitle')
+                        <div class="text-secondary mt-1">@yield('subtitle')</div>
+                        @endif
                     </div>
                     <div class="col-auto ms-auto">
                         @yield('actions')

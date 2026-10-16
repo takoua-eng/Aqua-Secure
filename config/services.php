@@ -33,6 +33,10 @@ return [
         'key' => env('ANTHROPIC_API_KEY'),
         'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
     ],
+        // Clé que les capteurs envoient dans l'en-tête X-Api-Key (API de télémétrie, binôme 4)
+    'telemetrie' => [
+        'cle' => env('TELEMETRIE_API_KEY'),
+    ],
 
     'slack' => [
         'notifications' => [

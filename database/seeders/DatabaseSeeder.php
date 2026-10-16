@@ -22,6 +22,9 @@ public function run(): void
 
     // Zones et réseaux d'eau de démonstration
     $this->call(InfrastructureSeeder::class);
+        // Capteurs et relevés de démonstration (binôme 4)
+    $this->call(SurveillanceSeeder::class);
+        // Risques et analyses de qualité de l'eau de démonstration (binôme 4)
     $this->call(QualiteEauSeeder::class);
 }
 }

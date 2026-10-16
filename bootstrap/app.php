@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
     $middleware->alias([
         'role' => \App\Http\Middleware\CheckRole::class,
+        'cle.telemetrie' => \App\Http\Middleware\VerifierCleTelemetrie::class,   // ← AJOUTER
     ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
