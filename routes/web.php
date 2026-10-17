@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ZoneController;
 use App\Http\Controllers\Admin\CapteurController;
 use App\Http\Controllers\Admin\ReleveController;
 use App\Http\Controllers\Front\SurveillanceController;
+use App\Http\Controllers\Front\IncidentPublicController;
 
 // ---------- Front office (citoyens) ----------
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -34,6 +35,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Surveillance du réseau (binôme 4) : état des capteurs, consultation uniquement
     Route::get('/surveillance', [SurveillanceController::class, 'index'])->name('surveillance.index');
     Route::get('/surveillance/{capteur}', [SurveillanceController::class, 'show'])->name('surveillance.show');
+    // Incidents et travaux (binôme 2) : consultation uniquement
+    Route::get('/incidents', [IncidentPublicController::class, 'index'])->name('incidents.index');
+    Route::get('/incidents/{incident}', [IncidentPublicController::class, 'show'])->name('incidents.show');
     
 });
 
@@ -122,12 +126,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ge
         ->except('show')
         ->parameters(['releves' => 'releve']);
 
+    // Exploitation (binôme 2) : incidents et interventions
+    require __DIR__.'/incidents.php';
+
     // Pages provisoires : chaque ligne sera remplacée par un contrôleur CRUD
     $modules = [
         // url             nom de route      titre                     section             icône           description
-        ['incidents',      'incidents',      'Incidents',              'Exploitation',     'alert-triangle', 'Fuites, contaminations et coupures signalées.'],
-        ['interventions',  'interventions',  'Interventions',          'Exploitation',     'tool',           'Équipes envoyées sur le terrain et suivi des réparations.'],
-        ['projets',        'projets',        'Projets de rénovation',  'Rénovation',       'building',       'Projets de rénovation et de décontamination, budget et financement.'],
+        ['projets',       'projets',        'Projets de rénovation',  'Rénovation',       'building',       'Projets de rénovation et de décontamination, budget et financement.'],
     ];
 
     foreach ($modules as [$url, $nom, $titre, $section, $icone, $description]) {
