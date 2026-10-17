@@ -3,9 +3,10 @@
 @section('title', 'Mot de passe oublié')
 
 @section('content')
-    @if (session('success'))
+    {{-- Message de Fortify après l'envoi du lien --}}
+    @if (session('status'))
         <div class="alert alert-success">
-            <i class="ti ti-mail-check me-1"></i> {{ session('success') }}
+            <i class="ti ti-mail-check me-1"></i> {{ session('status') }}
         </div>
     @endif
 

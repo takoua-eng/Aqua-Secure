@@ -5,7 +5,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
-
+use Illuminate\Auth\Notifications\VerifyEmail;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +31,17 @@ public function boot(): void
                 'token' => $token,
                 'email' => $notifiable->getEmailForPasswordReset(),
             ]);
+                // Email de vérification de l'adresse (envoyé après l'inscription), en français
+        VerifyEmail::toMailUsing(function ($notifiable, string $url) {
+            return (new MailMessage)
+                ->subject('AquaSecure — Confirmez votre adresse email')
+                ->greeting('Bonjour ' . $notifiable->nom . ',')
+                ->line('Merci pour votre inscription sur AquaSecure. Cliquez sur le bouton ci-dessous pour confirmer votre adresse email.')
+                ->action('Confirmer mon adresse email', $url)
+                ->line('Ce lien expire dans ' . config('auth.verification.expire', 60) . ' minutes.')
+                ->line("Si vous n'avez pas créé de compte, ignorez simplement cet email.")
+                ->salutation("L'équipe AquaSecure");
+        });
 
             return (new MailMessage)
                 ->subject('AquaSecure — Réinitialisation de votre mot de passe')

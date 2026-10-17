@@ -15,8 +15,7 @@
     <div class="col-lg-4">
         <div class="card">
             <div class="card-body p-4 text-center">
-                <span class="avatar avatar-xl mb-3 rounded-circle bg-{{ $user->couleurRole() }}-lt">{{ $user->initiales() }}</span>
-                <h3 class="m-0 mb-1">{{ $user->nom }}</h3>
+                <x-avatar :user="$user" taille="xl" class="mb-3" />                <h3 class="m-0 mb-1">{{ $user->nom }}</h3>
                 <div class="text-secondary">{{ $user->email }}</div>
                 <div class="mt-3">
                     <span class="badge bg-{{ $user->couleurRole() }}-lt">{{ $user->libelleRole() }}</span>
@@ -52,6 +51,26 @@
                             <span class="status status-{{ $user->couleurRole() }}">{{ $user->libelleRole() }}</span>
                         </div>
                     </div>
+                                            <div class="datagrid-item">
+                            <div class="datagrid-title">Email vérifié</div>
+                            <div class="datagrid-content">
+                                @if ($user->hasVerifiedEmail())
+                                    <span class="status status-green">Oui, le {{ $user->email_verified_at->format('d/m/Y') }}</span>
+                                @else
+                                    <span class="status status-yellow">Non</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="datagrid-item">
+                            <div class="datagrid-title">Double authentification</div>
+                            <div class="datagrid-content">
+                                @if ($user->aDoubleAuthentification())
+                                    <span class="status status-green">Activée</span>
+                                @else
+                                    <a href="{{ route('admin.parametres.securite') }}" class="status status-secondary">Désactivée</a>
+                                @endif
+                            </div>
+                        </div>
                     <div class="datagrid-item">
                         <div class="datagrid-title">Membre depuis</div>
                         <div class="datagrid-content">{{ $user->created_at?->format('d/m/Y') }}</div>

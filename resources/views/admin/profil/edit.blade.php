@@ -21,12 +21,18 @@
                     <h3 class="card-title">Profil</h3>
                     <div class="row align-items-center mb-4">
                         <div class="col-auto">
-                            <span class="avatar avatar-xl rounded-circle bg-{{ $user->couleurRole() }}-lt">{{ $user->initiales() }}</span>
+                            {{-- Aperçu : photo actuelle, remplacée en direct par l'image choisie --}}
+                            <span id="apercu-photo">
+                                <x-avatar :user="$user" taille="xl" />
+                            </span>
                         </div>
                         <div class="col">
                             <div class="fw-bold">{{ $user->nom }}</div>
                             <span class="badge bg-{{ $user->couleurRole() }}-lt mt-1">{{ $user->libelleRole() }}</span>
                             <div class="small text-secondary mt-1">Le rôle ne peut être modifié que par un administrateur.</div>
+                        </div>
+                        <div class="col-md-5 mt-3 mt-md-0">
+                            @include('compte._photo')
                         </div>
                     </div>
 

@@ -77,7 +77,7 @@
             <div class="sidebar-user border-top p-2 dropup">
                 <a href="#" class="d-flex align-items-center gap-2 p-2 rounded text-reset text-decoration-none"
                    data-bs-toggle="dropdown" aria-expanded="false" title="{{ $moi->nom }}">
-                    <span class="avatar avatar-sm rounded-circle bg-{{ $moi->couleurRole() }}-lt">{{ $moi->initiales() }}</span>
+                    <x-avatar :user="$moi" taille="sm" />
                     <div class="sidebar-user-text lh-sm">
                         <div class="fw-medium">{{ $moi->nom }}</div>
                         <div class="small text-secondary">{{ $moi->libelleRole() }}</div>
@@ -95,6 +95,9 @@
                     <a href="{{ route('admin.parametres.password') }}" class="dropdown-item">
                         <i class="ti ti-lock me-2"></i> Mot de passe
                     </a>
+                                            <a href="{{ route('admin.parametres.securite') }}" class="dropdown-item">
+                            <i class="ti ti-shield-lock me-2"></i> Sécurité (2FA)
+                        </a>
                     <div class="dropdown-divider"></div>
                     <a href="{{ route('home') }}" class="dropdown-item" target="_blank">
                         <i class="ti ti-world me-2"></i> Voir le site public

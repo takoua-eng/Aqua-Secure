@@ -77,6 +77,12 @@ class ReseauEau extends Model
         return $this->hasMany(HistoriqueEtat::class)->latest()->latest('id');
     }
 
+        // RESEAU_EAU 1 — N CAPTEUR (binôme 4)
+    public function capteurs(): HasMany
+    {
+        return $this->hasMany(Capteur::class, 'reseau_id');
+    }
+
     // RESEAU_EAU 1 — N POINT_PRELEVEMENT (module Qualité de l'eau)
     public function pointsPrelevement(): HasMany
     {

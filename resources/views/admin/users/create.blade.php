@@ -4,7 +4,7 @@
 @section('pretitle', 'Administration')
 
 @section('content')
-    <form method="POST" action="{{ route('admin.users.store') }}" class="card" data-validate>
+    <form method="POST"  enctype="multipart/form-data" action="{{ route('admin.users.store') }}" class="card" data-validate >
         @csrf
 
         <div class="card-body">
