@@ -16,6 +16,7 @@
                     <li><a href="{{ route('home') }}">Accueil</a></li>
                     @auth
                         <li><a href="{{ route('qualite.index') }}">Qualité de l'eau</a></li>
+                        <li><a href="{{ route('surveillance.index') }}">Surveillance du réseau</a></li>
                     @endauth
 @auth
     @if (auth()->user()->isCitoyen())

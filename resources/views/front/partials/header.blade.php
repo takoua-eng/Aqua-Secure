@@ -19,6 +19,9 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('qualite.*') ? 'active' : '' }}" href="{{ route('qualite.index') }}">Qualité de l'eau</a>
                     </li>
+                                        <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('surveillance.*') ? 'active' : '' }}" href="{{ route('surveillance.index') }}">Surveillance</a>
+                    </li>
                 @endauth
 
                 {{-- Visiteur non connecté --}}
@@ -30,14 +33,24 @@
                 {{-- Utilisateur connecté --}}
                 @auth
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ auth()->user()->nom }}
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+                            @if (auth()->user()->photo)
+                                <img src="{{ auth()->user()->photoUrl() }}" alt="" class="rounded-circle"
+                                     style="width: 28px; height: 28px; object-fit: cover">
+                            @else
+                                <i class="bi bi-person-circle"></i>
+                            @endif
+                            {{ auth()->user()->nom }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             @if (auth()->user()->peutAccederBackOffice())
                                 <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Espace de gestion</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.parametres') }}">Paramètres du compte</a></li>
+                            @else
+                                <li><a class="dropdown-item" href="{{ route('compte') }}"><i class="bi bi-person-gear me-1"></i> Mon compte</a></li>
+                                <li><a class="dropdown-item" href="{{ route('compte.securite') }}"><i class="bi bi-shield-lock me-1"></i> Sécurité (2FA)</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf

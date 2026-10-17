@@ -9,6 +9,10 @@
            class="list-group-item list-group-item-action d-flex align-items-center {{ request()->routeIs('admin.parametres.password') ? 'active' : '' }}">
             <i class="ti ti-lock me-2"></i> Mot de passe
         </a>
+                <a href="{{ route('admin.parametres.securite') }}"
+           class="list-group-item list-group-item-action d-flex align-items-center {{ request()->routeIs('admin.parametres.securite') ? 'active' : '' }}">
+            <i class="ti ti-shield-lock me-2"></i> Sécurité
+        </a>
     </div>
 
     <h4 class="subheader mt-4">Raccourcis</h4>

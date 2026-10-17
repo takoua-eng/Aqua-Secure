@@ -30,6 +30,9 @@ class UserRequest extends FormRequest
                 'regex:/^(?=.*[A-Za-z])(?=.*\d).+$/',  // au moins une lettre et un chiffre
                 'confirmed',
             ],
+                        // Photo de profil facultative (JPG, PNG ou WEBP, 2 Mo maximum)
+            'photo'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048', 'dimensions:min_width=100,min_height=100'],
+            'supprimer_photo' => ['nullable', 'boolean'],
         ];
     }
 
@@ -53,6 +56,11 @@ class UserRequest extends FormRequest
             'password.min'       => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.regex'     => 'Le mot de passe doit contenir au moins une lettre et un chiffre.',
             'password.confirmed' => 'Les deux mots de passe ne correspondent pas.',
+            
+            'photo.image'        => 'Le fichier doit être une image.',
+            'photo.mimes'        => 'La photo doit être au format JPG, PNG ou WEBP.',
+            'photo.max'          => 'La photo ne doit pas dépasser 2 Mo.',
+            'photo.dimensions'   => 'La photo doit mesurer au moins 100 × 100 pixels.',
         ];
     }
 }

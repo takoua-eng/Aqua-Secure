@@ -15,7 +15,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('register.submit') }}" data-validate>
+            <form method="POST" action="{{ route('register') }}" data-validate>
                 @csrf
 
                 <x-front-input name="nom" label="Nom complet" icon="person" required

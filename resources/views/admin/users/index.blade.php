@@ -49,7 +49,7 @@
             <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body p-4 text-center">
-                        <span class="avatar avatar-xl mb-3 rounded-circle bg-{{ $couleur }}-lt">{{ $initiales }}</span>
+                        <x-avatar :user="$user" taille="xl" class="mb-3" />
                         <h3 class="m-0 mb-1">
                             <a href="{{ route('admin.users.edit', $user) }}">{{ $user->nom }}</a>
                         </h3>

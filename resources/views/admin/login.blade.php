@@ -19,13 +19,14 @@
         <div class="card card-md">
             <div class="card-body">
                 <h2 class="h2 text-center mb-4">Connexion</h2>
-                @if (session('success'))
-    <div class="alert alert-success">
-        <i class="ti ti-circle-check me-1"></i> {{ session('success') }}
-    </div>
-@endif
+                {{-- Messages de Fortify (ex : "Votre mot de passe a été réinitialisé") ou de l'application --}}
+                @if (session('status') || session('success'))
+                    <div class="alert alert-success">
+                        <i class="ti ti-circle-check me-1"></i> {{ session('status') ?? session('success') }}
+                    </div>
+                @endif
 
-                <form action="{{ route('login.submit') }}" method="POST" data-validate>
+                <form action="{{ route('login') }}" method="POST" data-validate>
                     @csrf
 
                     <x-input name="email" type="email" label="Adresse email" icon="mail" required autofocus

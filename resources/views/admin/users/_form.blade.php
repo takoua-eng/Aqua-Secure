@@ -3,7 +3,21 @@
         <i class="ti ti-alert-circle me-1"></i> Veuillez corriger les champs en rouge.
     </div>
 @endif
-
+{{-- Photo de profil (facultative) : aperçu à gauche, champ à droite --}}
+<div class="row align-items-center mb-3">
+    <div class="col-auto">
+        <span id="apercu-photo">
+            @if ($user->exists)
+                <x-avatar :user="$user" taille="xl" />
+            @else
+                <span class="avatar avatar-xl rounded-circle"><i class="ti ti-user" style="font-size: 2rem"></i></span>
+            @endif
+        </span>
+    </div>
+    <div class="col-md-6">
+        @include('compte._photo')
+    </div>
+</div>
 <div class="row">
     <div class="col-md-6">
         <x-input name="nom" label="Nom complet" icon="user" :value="$user->nom" required
