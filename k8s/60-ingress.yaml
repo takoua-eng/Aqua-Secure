@@ -1,0 +1,23 @@
+# =====================================================================
+# Point d'entrée : http://aquasecure.local:30080
+# Même contrôleur Ingress Nginx que hr-platform ; AquaSecure est reconnu par son nom d'hôte.
+# Sur le PC : ajouter "192.168.255.136  aquasecure.local" dans le fichier hosts.
+# =====================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aquasecure
+  namespace: aquasecure
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "12m"       # photos de profil, import CSV des réseaux
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"    # analyses IA et rapports PDF
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aquasecure.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: aquasecure, port: { number: 8080 } }

@@ -1,0 +1,25 @@
+# Fichiers exclus de l'image Docker
+.git
+.github
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+public/storage
+public/hot
+storage/*.key
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/public/photos
+bootstrap/cache/*.php
+database/database.sqlite
+.phpunit.cache
+.phpunit.result.cache
+phpunit.local.xml
+k8s
+Jenkinsfile
+docker-compose.yml
+*.log

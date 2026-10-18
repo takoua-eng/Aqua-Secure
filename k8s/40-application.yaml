@@ -1,0 +1,73 @@
+# =====================================================================
+# Application AquaSecure (Laravel + Apache)
+#   - conteneur d'initialisation "migrations" : met la base à jour avant chaque démarrage
+#   - conteneur "app" : le site (back office, front office, API de télémétrie)
+# =====================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: aquasecure
+  namespace: aquasecure
+spec:
+  selector:
+    app: aquasecure
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aquasecure
+  namespace: aquasecure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aquasecure
+  template:
+    metadata:
+      labels:
+        app: aquasecure
+    spec:
+      initContainers:
+        # Migrations de la base : si elles échouent, la nouvelle version ne démarre pas
+        # (Kubernetes garde l'ancienne en service)
+        - name: migrations
+          image: 192.168.255.129:8082/aquasecure:latest
+          imagePullPolicy: IfNotPresent
+          args: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - configMapRef: { name: aquasecure-config }
+            - secretRef: { name: aquasecure-secrets }
+      containers:
+        - name: app
+          image: 192.168.255.129:8082/aquasecure:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: aquasecure-config }
+            - secretRef: { name: aquasecure-secrets }
+          ports:
+            - containerPort: 8080
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits:   { memory: 512Mi }
+          # /up : sonde de santé fournie par Laravel
+          startupProbe:
+            httpGet: { path: /up, port: 8080 }
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet: { path: /up, port: 8080 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /up, port: 8080 }
+            periodSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            - name: stockage
+              mountPath: /var/www/html/storage/app
+      volumes:
+        - name: stockage
+          persistentVolumeClaim:
+            claimName: stockage
