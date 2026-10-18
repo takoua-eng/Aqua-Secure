@@ -140,6 +140,7 @@
                         </div>
                     </div>
                     <div class="card-body pb-0">
+                        <label class="visually-hidden" for="wi-filtre">Filtrer les projets</label>
                         <input type="search" class="form-control form-control-sm mb-2" id="wi-filtre" placeholder="Filtrer les projets…">
                     </div>
                     <div class="card-body pt-0 wi-projets" id="wi-projets">

@@ -287,7 +287,8 @@
                                 @endif
                                 <form method="POST" action="{{ route('admin.projets.questions.repondre', [$projet, $q]) }}">
                                     @csrf
-                                    <textarea name="reponse" rows="2" class="form-control form-control-sm mb-1" required minlength="5" maxlength="1500"
+                                    <label class="visually-hidden" for="reponse-{{ $q->id }}">Réponse publique à la question</label>
+                                    <textarea name="reponse" id="reponse-{{ $q->id }}" rows="2" class="form-control form-control-sm mb-1" required minlength="5" maxlength="1500"
                                               placeholder="Réponse publique…">{{ $q->reponse }}</textarea>
                                     <div class="d-flex align-items-center gap-2">
                                         <input type="hidden" name="publiee" value="0">
