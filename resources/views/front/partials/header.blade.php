@@ -13,7 +13,9 @@
                 <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Accueil</a>
                 </li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#projets">Projets</a></li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('renovation.*') ? 'active' : '' }}" href="{{ route('renovation.index') }}">Rénovation</a>
+                </li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#carte">Carte</a></li>
                 @auth
                     <li class="nav-item">
