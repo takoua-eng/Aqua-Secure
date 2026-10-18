@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,7 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Derrière l'Ingress Nginx de Kubernetes : faire confiance aux en-têtes X-Forwarded-*
         // (adresse IP du visiteur, protocole et port d'origine)
-        $middleware->trustProxies(at: '*');
+                // Derrière l'Ingress NGINX (NodePort 30080) : on ne fait PAS confiance à X-Forwarded-Port
+        // (il vaut 80, le port interne du contrôleur). Le port 30080 est lu dans X-Forwarded-Host.
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_AWS_ELB,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
