@@ -10,20 +10,10 @@ metadata:
   namespace: aquasecure
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: aquasecure-# =====================================================================
-# Planificateur Laravel (php artisan schedule:work) : même image que l'application.
-# Lance chaque minute le simulateur de capteurs (routes/console.php) :
-# le front office "Surveillance" reçoit des mesures en continu.
-# =====================================================================
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: aquasecure-planificateur
-  namespace: aquasecure
-spec:
-  replicas: 1
+  # Un seul planificateur à la fois : l'ancien est arrêté AVANT de lancer le nouveau
+  # (sinon les tâches planifiées tourneraient en double pendant la mise à jour)
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: aquasecure-planificateur
@@ -32,35 +22,10 @@ spec:
       labels:
         app: aquasecure-planificateur
     spec:
+      terminationGracePeriodSeconds: 10
       # Identifiants Nexus pour télécharger l'image (Secret "nexus-pull", créé à la main)
       imagePullSecrets:
         - name: nexus-pull
-      containers:
-        - name: planificateur
-          image: 192.168.255.129:8082/aquasecure:latest
-          imagePullPolicy: IfNotPresent
-          args: ["php", "artisan", "schedule:work"]
-          envFrom:
-            - configMapRef: { name: aquasecure-config }
-            - secretRef: { name: aquasecure-secrets }
-          env:
-            # Les alertes des capteurs simulés sont écrites dans les journaux au lieu d'être envoyées par email
-            - { name: MAIL_MAILER, value: log }
-          resources:
-            requests: { cpu: 50m, memory: 128Mi }
-            limits:   { memory: 256Mi }
-          volumeMounts:
-            - name: stockage
-              mountPath: /var/www/html/storage/app
-      volumes:
-        - name: stockage
-          persistentVolumeClaim:
-            claimName: stockageplanificateur
-  template:
-    metadata:
-      labels:
-        app: aquasecure-planificateur
-    spec:
       containers:
         - name: planificateur
           image: 192.168.255.129:8082/aquasecure:latest
