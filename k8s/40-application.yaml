@@ -30,6 +30,9 @@ spec:
       labels:
         app: aquasecure
     spec:
+      # Identifiants Nexus pour télécharger l'image (Secret "nexus-pull", créé à la main)
+      imagePullSecrets:
+        - name: nexus-pull
       initContainers:
         # Migrations de la base : si elles échouent, la nouvelle version ne démarre pas
         # (Kubernetes garde l'ancienne en service)
