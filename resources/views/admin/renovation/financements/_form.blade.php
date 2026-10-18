@@ -37,11 +37,11 @@
 </div>
 
 @push('scripts')
+@php $actuelJs = $financement->exists ? ['id' => $financement->projet_id, 'montant' => (float) $financement->montant] : null; @endphp
 <script>
     (function () {
         // Aide à la saisie : reste à financer selon le coût déclaré (devis) du projet choisi
         const restes = @json($restes);
-        @php $actuelJs = $financement->exists ? ['id' => $financement->projet_id, 'montant' => (float) $financement->montant] : null; @endphp
         const actuel = @json($actuelJs);
         const projet = document.getElementById('champ-projet_id');
         const aide = document.getElementById('aide-reste');

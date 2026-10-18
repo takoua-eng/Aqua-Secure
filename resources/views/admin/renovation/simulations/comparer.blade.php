@@ -71,14 +71,14 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js" integrity="sha384-5u6RO0Q8xx8HD9yfm1MUPRgt4kTTlZxjJmXIFZxa5pEZy7U9XOtkAZgbF1fSYmsw" crossorigin="anonymous"></script>
+    @php
+    // Préparé ici : @json découpe son argument sur les virgules (il perdrait l'échappement des balises HTML)
+    $simsJs = $simulations->map(fn ($s) => ['nom' => $s->nom, 'lignes' => collect($s->scenarioRetenu()['lignes'])
+    ->map(fn ($l) => ['titre' => $l['titre'], 'propose' => $l['propose']])->all()])->values();
+    @endphp
     <script>
         (function () {
-            @php
-                // Préparé ici : @json découpe son argument sur les virgules (il perdrait l'échappement de « </script> »)
-                $simsJs = $simulations->map(fn ($s) => ['nom' => $s->nom, 'lignes' => collect($s->scenarioRetenu()['lignes'])
-                    ->map(fn ($l) => ['titre' => $l['titre'], 'propose' => $l['propose']])->all()])->values();
-            @endphp
             const sims = @json($simsJs);
             const titres = [...new Set(sims.flatMap(s => s.lignes.filter(l => l.propose > 0).map(l => l.titre)))].slice(0, 20);
             new ApexCharts(document.getElementById('graphique-comparer'), {

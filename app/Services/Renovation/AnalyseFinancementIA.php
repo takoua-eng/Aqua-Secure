@@ -189,7 +189,7 @@ class AnalyseFinancementIA
             return self::resultatSecours($secours(), 'Aucune clé API configurée : analyse rédigée automatiquement par des règles.');
         }
 
-        $cle = "binome3-ia:{$type}:" . md5(json_encode($donnees) . self::fournisseur()
+        $cle = "binome3-ia:{$type}:" . hash('sha256', json_encode($donnees) . self::fournisseur()
             . config('renovation.ia.groq.model') . config('services.anthropic.model'));
         if (self::$appelant === null && ($deja = Cache::get($cle))) {
             return $deja;

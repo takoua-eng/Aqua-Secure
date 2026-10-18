@@ -10,7 +10,7 @@
 @section('title', $t('titre_page'))
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
 @if ($rtl)
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
 @endif
@@ -77,8 +77,8 @@
     <form method="GET" class="card obs-carte-section p-3 p-md-4 mb-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-5">
-                <label class="form-label fw-semibold mb-1"><i class="bi bi-house-heart me-1 text-primary"></i> {{ $t('mon_quartier') }}</label>
-                <select name="commune" class="form-select form-select-lg" onchange="this.form.submit()">
+                <label class="form-label fw-semibold mb-1" for="f-commune"><i class="bi bi-house-heart me-1 text-primary"></i> {{ $t('mon_quartier') }}</label>
+                <select name="commune" id="f-commune" class="form-select form-select-lg" onchange="this.form.submit()">
                     <option value="">{{ $t('choisir_commune') }}</option>
                     @foreach ($communes as $c)
                         <option value="{{ $c }}" @selected($commune === $c)>{{ $c }}</option>
@@ -86,8 +86,8 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="form-label small text-secondary mb-1">{{ $t('rechercher_chantier') }}</label>
-                <input type="search" name="q" value="{{ request('q') }}" class="form-control form-control-lg" placeholder="{{ $t('placeholder_recherche') }}">
+                <label class="form-label small text-secondary mb-1" for="f-q">{{ $t('rechercher_chantier') }}</label>
+                <input type="search" name="q" id="f-q" value="{{ request('q') }}" class="form-control form-control-lg" placeholder="{{ $t('placeholder_recherche') }}">
             </div>
             <div class="col-md-3 d-flex gap-2">
                 <button class="btn btn-eau btn-lg flex-fill"><i class="bi bi-search"></i> {{ $t('explorer') }}</button>
@@ -273,8 +273,9 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js" integrity="sha384-5u6RO0Q8xx8HD9yfm1MUPRgt4kTTlZxjJmXIFZxa5pEZy7U9XOtkAZgbF1fSYmsw" crossorigin="anonymous"></script>
+@php $textesJs = ['obtenus' => $t('obtenus_popup'), 'du_cout' => $t('du_cout'), 'voir' => $t('voir_chantier'), 'suivre' => $t('suivre'), 'ne_plus' => $t('ne_plus_suivre'), 'dt' => $t('dt')]; @endphp
 <script>
 (function () {
     const echapper = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -282,7 +283,6 @@
     const projets = @json($projetsJson);
     const carte = @json($carte);
     const repartition = @json($repartition);
-    @php $textesJs = ['obtenus' => $t('obtenus_popup'), 'du_cout' => $t('du_cout'), 'voir' => $t('voir_chantier'), 'suivre' => $t('suivre'), 'ne_plus' => $t('ne_plus_suivre'), 'dt' => $t('dt')]; @endphp
     const textes = @json($textesJs);
 
     // 1. Compteurs animés

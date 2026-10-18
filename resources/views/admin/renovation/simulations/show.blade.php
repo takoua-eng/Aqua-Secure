@@ -341,13 +341,13 @@
 
 @push('scripts')
     <script src="{{ asset('js/renovation-ia.js') }}"></script>
+    @php $urlAnalyseJs = route('admin.simulations.analyser', $simulation); @endphp
     <script>
         document.getElementById('bouton-analyse')?.addEventListener('click', async function () {
             const zone = document.getElementById('zone-analyse');
             this.disabled = true;
             RenovationIA.attente(zone, "Analyse du scénario en cours… (jusqu'à une minute)");
             try {
-                @php $urlAnalyseJs = route('admin.simulations.analyser', $simulation); @endphp
                 const [ok, d] = await RenovationIA.envoyer(@json($urlAnalyseJs));
                 ok ? window.location.reload() : RenovationIA.erreur(zone, d);
             } catch (e) {

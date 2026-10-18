@@ -56,7 +56,10 @@
                         @forelse ($simulations as $s)
                             @php $k = $s->scenarioRetenu()['kpi'] ?? null; @endphp
                             <tr>
-                                <td><input type="checkbox" class="form-check-input choix-comparer" name="ids[]" value="{{ $s->id }}"></td>
+                                <td>
+                                    <input type="checkbox" class="form-check-input choix-comparer" name="ids[]" id="comparer-{{ $s->id }}" value="{{ $s->id }}">
+                                    <label class="visually-hidden" for="comparer-{{ $s->id }}">Comparer « {{ $s->nom }} »</label>
+                                </td>
                                 <td>
                                     <a href="{{ route('admin.simulations.show', $s) }}" class="fw-medium">{{ $s->nom }}</a>
                                     <div class="small text-secondary">{{ $s->created_at->format('d/m/Y à H:i') }}</div>

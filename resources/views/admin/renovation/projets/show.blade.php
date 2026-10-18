@@ -290,9 +290,9 @@
                                     <textarea name="reponse" rows="2" class="form-control form-control-sm mb-1" required minlength="5" maxlength="1500"
                                               placeholder="Réponse publique…">{{ $q->reponse }}</textarea>
                                     <div class="d-flex align-items-center gap-2">
-                                        <label class="form-check mb-0 small">
-                                            <input type="hidden" name="publiee" value="0">
-                                            <input type="checkbox" class="form-check-input" name="publiee" value="1" @checked($q->publiee || ! $q->reponse)>
+                                        <input type="hidden" name="publiee" value="0">
+                                        <label class="form-check mb-0 small" for="publier-{{ $q->id }}">
+                                            <input type="checkbox" class="form-check-input" name="publiee" id="publier-{{ $q->id }}" value="1" @checked($q->publiee || ! $q->reponse)>
                                             <span class="form-check-label">Publier</span>
                                         </label>
                                         <button class="btn btn-sm btn-primary ms-auto"><i class="ti ti-send me-1"></i>{{ $q->reponse ? 'Modifier' : 'Répondre' }}</button>

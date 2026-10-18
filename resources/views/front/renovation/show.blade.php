@@ -14,7 +14,7 @@
 @section('title', $projet->titre)
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
 @if ($rtl)
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
 @endif
@@ -268,11 +268,12 @@
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+@php $textesJs = ['suivre' => $t('suivre_court'), 'suivi' => $t('suivi_court')]; @endphp
+@php $partageJs = ['title' => $projet->titre, 'url' => route('renovation.show', $projet)]; @endphp
 <script>
 (function () {
     const nombre = v => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(v);
-    @php $textesJs = ['suivre' => $t('suivre_court'), 'suivi' => $t('suivi_court')]; @endphp
     const textes = @json($textesJs);
 
     // Barre d'avancement et montant animés
@@ -315,7 +316,6 @@
 
     // Partager : menu natif du téléphone, sinon copie du lien
     document.getElementById('bouton-partager').addEventListener('click', async () => {
-        @php $partageJs = ['title' => $projet->titre, 'url' => route('renovation.show', $projet)]; @endphp
         const donnees = @json($partageJs);
         try {
             if (navigator.share) { await navigator.share(donnees); return; }

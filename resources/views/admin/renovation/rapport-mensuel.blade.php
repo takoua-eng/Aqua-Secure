@@ -18,7 +18,8 @@
         th { background: #f3f5f8; font-size: 9px; }
         .droite { text-align: right; }
         .gris { color: #6b7685; }
-        .kpi td { border: 1px solid #dce1e7; text-align: center; width: 25%; }
+        .kpi td, .kpi th { border: 1px solid #dce1e7; text-align: center; width: 25%; }
+        th[scope="row"] { background: none; font-size: 10px; font-weight: normal; }
         .kpi .valeur { font-size: 15px; font-weight: bold; color: #0a3d62; }
         .encadre { border-radius: 4px; padding: 8px 10px; margin-bottom: 6px; }
         .ia { background: #fdeaf1; } .secours { background: #f1f3f5; }
@@ -31,12 +32,17 @@
 
     <h2>1. Chiffres du mois <span class="etiquette">Calculé</span></h2>
     <table class="kpi">
-        <tr>
-            <td><div class="valeur">{{ $f['nombre'] }}</div>financement(s) enregistré(s)</td>
-            <td><div class="valeur">{{ $dt($f['montant']) }}</div>montant du mois</td>
-            <td><div class="valeur">{{ $dt($d['montant_mois_precedent']) }}</div>mois précédent</td>
-            <td><div class="valeur">{{ $d['projets_crees_du_mois'] }}</div>projet(s) créé(s)</td>
-        </tr>
+        <thead>
+            <tr><th>Financements enregistrés</th><th>Montant du mois</th><th>Mois précédent</th><th>Projets créés</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><div class="valeur">{{ $f['nombre'] }}</div></td>
+                <td><div class="valeur">{{ $dt($f['montant']) }}</div></td>
+                <td><div class="valeur">{{ $dt($d['montant_mois_precedent']) }}</div></td>
+                <td><div class="valeur">{{ $d['projets_crees_du_mois'] }}</div></td>
+            </tr>
+        </tbody>
     </table>
     @if ($f['par_source'])
         <table style="margin-top: 6px">
@@ -51,11 +57,14 @@
 
     <h2>2. Situation à la date du rapport <span class="etiquette">Calculé</span></h2>
     <table>
-        <tr><td>Projets suivis</td><td class="droite">{{ $s['projets'] }} ({{ collect($s['par_statut'])->map(fn ($n, $l) => "$l : $n")->implode(', ') }})</td></tr>
-        <tr><td>Total des financements enregistrés</td><td class="droite">{{ $dt($s['total_finance']) }}</td></tr>
-        <tr><td>Projets planifiés ou en cours sans financement</td><td class="droite">{{ $s['projets_sans_financement'] }}</td></tr>
-        <tr><td>Taux de couverture (projets avec devis)</td><td class="droite">{{ $s['taux_couverture_devis_pct'] !== null ? number_format($s['taux_couverture_devis_pct'], 1, ',', ' ') . ' %' : 'non calculable' }}</td></tr>
-        <tr><td>Indice de Gini territorial (0 = égalité)</td><td class="droite">{{ $s['indice_gini_territorial'] !== null ? number_format($s['indice_gini_territorial'], 2, ',', ' ') : '—' }}</td></tr>
+        <thead><tr><th>Indicateur</th><th class="droite">Valeur</th></tr></thead>
+        <tbody>
+            <tr><th scope="row">Projets suivis</th><td class="droite">{{ $s['projets'] }} ({{ collect($s['par_statut'])->map(fn ($n, $l) => "$l : $n")->implode(', ') }})</td></tr>
+            <tr><th scope="row">Total des financements enregistrés</th><td class="droite">{{ $dt($s['total_finance']) }}</td></tr>
+            <tr><th scope="row">Projets planifiés ou en cours sans financement</th><td class="droite">{{ $s['projets_sans_financement'] }}</td></tr>
+            <tr><th scope="row">Taux de couverture (projets avec devis)</th><td class="droite">{{ $s['taux_couverture_devis_pct'] !== null ? number_format($s['taux_couverture_devis_pct'], 1, ',', ' ') . ' %' : 'non calculable' }}</td></tr>
+            <tr><th scope="row">Indice de Gini territorial (0 = égalité)</th><td class="droite">{{ $s['indice_gini_territorial'] !== null ? number_format($s['indice_gini_territorial'], 2, ',', ' ') : '—' }}</td></tr>
+        </tbody>
     </table>
 
     <h2>3. Synthèse {{ $synthese['origine'] === 'ia' ? 'rédigée par l\'IA' : '(mode secours, règles fixes)' }}</h2>
@@ -85,6 +94,7 @@
 
     <h2>5. Alertes <span class="etiquette">Calculé</span></h2>
     <table>
+        <thead><tr><th>Règle</th><th>Alerte</th><th>Niveau</th></tr></thead>
         <tbody>
             @forelse ($d['alertes'] as $al)
                 <tr><td>{{ $al['code'] }}</td><td>{{ $al['titre'] }}</td><td>{{ ['danger' => 'Critique', 'warning' => 'À surveiller', 'info' => 'Information'][$al['niveau']] }}</td></tr>

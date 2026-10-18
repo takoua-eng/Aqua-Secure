@@ -49,14 +49,19 @@
     <h2>2. Stratégie retenue : {{ $noms[$simulation->strategie] }} <span class="etiquette calc">Calculé</span></h2>
     <p>{{ $s['criteres'] }}</p>
     <table>
-        <tr>
-            <td>Budget hypothétique<br><strong>{{ $dt($k['budget']) }}</strong></td>
-            <td>Alloué<br><strong>{{ $dt($k['alloue']) }}</strong></td>
-            <td>Projets achevés<br><strong>{{ $k['nb_complets'] }} / {{ $k['nb_candidats'] }}</strong></td>
-            <td>Financements partiels<br><strong>{{ $k['nb_partiels'] }}</strong></td>
-            <td>Priorité couverte<br><strong>{{ number_format($k['priorite_couverte_pct'], 1, ',', ' ') }} %</strong></td>
-            <td>Réseaux dégradés traités<br><strong>{{ $k['critiques_couverts'] }} / {{ $k['critiques_total'] }}</strong></td>
-        </tr>
+        <thead>
+            <tr><th>Budget hypothétique</th><th>Alloué</th><th>Projets achevés</th><th>Financements partiels</th><th>Priorité couverte</th><th>Réseaux dégradés traités</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>{{ $dt($k['budget']) }}</strong></td>
+                <td><strong>{{ $dt($k['alloue']) }}</strong></td>
+                <td><strong>{{ $k['nb_complets'] }} / {{ $k['nb_candidats'] }}</strong></td>
+                <td><strong>{{ $k['nb_partiels'] }}</strong></td>
+                <td><strong>{{ number_format($k['priorite_couverte_pct'], 1, ',', ' ') }} %</strong></td>
+                <td><strong>{{ $k['critiques_couverts'] }} / {{ $k['critiques_total'] }}</strong></td>
+            </tr>
+        </tbody>
     </table>
 
     <h2>3. Répartition proposée <span class="etiquette calc">Calculé</span></h2>

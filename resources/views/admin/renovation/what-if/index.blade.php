@@ -144,8 +144,8 @@
                     </div>
                     <div class="card-body pt-0 wi-projets" id="wi-projets">
                         @foreach ($candidats as $c)
-                            <label class="form-check wi-projet" data-texte="{{ mb_strtolower($c['titre'] . ' ' . $c['reseau'] . ' ' . $c['zone']) }}">
-                                <input class="form-check-input wi-inclus" type="checkbox" value="{{ $c['id'] }}" @checked($c['statut'] !== 'termine')
+                            <label class="form-check wi-projet" for="wi-inclus-{{ $c['id'] }}" data-texte="{{ mb_strtolower($c['titre'] . ' ' . $c['reseau'] . ' ' . $c['zone']) }}">
+                                <input class="form-check-input wi-inclus" type="checkbox" id="wi-inclus-{{ $c['id'] }}" value="{{ $c['id'] }}" @checked($c['statut'] !== 'termine')
                                        @disabled($c['statut'] === 'termine')>
                                 <span class="form-check-label d-block">
                                     <span class="d-flex align-items-center gap-1">
@@ -302,14 +302,14 @@
 
 @push('scripts')
     @unless (empty($candidats))
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js" integrity="sha384-5u6RO0Q8xx8HD9yfm1MUPRgt4kTTlZxjJmXIFZxa5pEZy7U9XOtkAZgbF1fSYmsw" crossorigin="anonymous"></script>
         <script src="{{ asset('js/renovation-ia.js') }}"></script>
+        @php $strategiesJs = collect($strategies)->map(fn ($s) => ['lettre' => $s['lettre'], 'libelle' => $s['libelle']]); @endphp
         <script>
             window.WhatIfConfig = {
                 urlSimuler: @json(route('admin.whatif.simuler')),
                 urlAnalyser: @json(route('admin.whatif.analyser')),
                 besoinTotal: @json($besoinTotal),
-                @php $strategiesJs = collect($strategies)->map(fn ($s) => ['lettre' => $s['lettre'], 'libelle' => $s['libelle']]); @endphp
                 strategies: @json($strategiesJs),
                 etats: @json(\App\Models\ReseauEau::ETATS),
             };

@@ -2,6 +2,8 @@
 
 namespace App\Services\Renovation;
 
+use App\Services\Renovation\Apprentissage\GenerateurReproductible;
+
 /*
  * Binôme 3 — robustesse d'un scénario What If? face à l'incertitude des coûts (simulation de Monte-Carlo).
  *
@@ -28,7 +30,7 @@ class RobustesseScenario
         $lignes = array_values(array_filter($scenario['lignes'], fn ($l) => $l['propose'] > 0));
         $alloue = array_sum(array_column($lignes, 'propose'));
 
-        mt_srand(self::GRAINE);
+        $g = new GenerateurReproductible(self::GRAINE);   // générateur propre : mêmes paramètres, même résultat
         $totaux = [];
         $tient = 0;
 
@@ -40,13 +42,12 @@ class RobustesseScenario
                     continue;
                 }
                 $u = $l['cout_source'] === 'declare' ? $incertitudeDevis : $incertitudeEstime;
-                $coutReel = $l['cout'] * (1 + $u * (2 * mt_rand() / mt_getrandmax() - 1));
+                $coutReel = $l['cout'] * (1 + $u * (2 * $g->reel() - 1));
                 $total += max($l['propose'], $coutReel - $l['finance']);
             }
             $totaux[] = $total;
             $tient += $total <= $budget + 0.005 ? 1 : 0;
         }
-        mt_srand();   // on rend un générateur imprévisible au reste de l'application
 
         sort($totaux);
         $quantile = fn (float $q) => $totaux ? $totaux[(int) min(count($totaux) - 1, floor($q * count($totaux)))] : 0.0;

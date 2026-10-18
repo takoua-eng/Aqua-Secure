@@ -55,6 +55,7 @@
             <div class="card">
                 <div class="card-header"><h3 class="card-title"><i class="ti ti-table me-1"></i> Colonnes attendues</h3></div>
                 <table class="table table-sm card-table">
+                    <thead><tr><th>Colonne</th><th>Contenu</th></tr></thead>
                     <tbody>
                         <tr><td class="font-monospace">projet_id</td><td>Numéro du projet (visible dans son adresse : /admin/projets/<strong>12</strong>)</td></tr>
                         <tr><td class="font-monospace">projet</td><td>Titre, facultatif (aide à la relecture, non utilisé)</td></tr>

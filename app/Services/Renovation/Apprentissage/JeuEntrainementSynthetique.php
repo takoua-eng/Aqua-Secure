@@ -63,7 +63,7 @@ class JeuEntrainementSynthetique
      */
     public static function generer(int $taille = self::TAILLE): array
     {
-        mt_srand(self::GRAINE);
+        $g = new GenerateurReproductible(self::GRAINE);
         $communes = [];
         foreach (config('communes') as $gouvernorat => $liste) {
             foreach (array_keys($liste) as $commune) {
@@ -73,61 +73,60 @@ class JeuEntrainementSynthetique
 
         $exemples = [];
         for ($i = 0; $i < $taille; $i++) {
-            $type = self::tirer(['canalisation' => 60, 'reservoir' => 25, 'station' => 15]);
+            $type = self::tirer($g, ['canalisation' => 60, 'reservoir' => 25, 'station' => 15]);
             $materiaux = self::MATERIAUX_PAR_TYPE[$type];
-            $materiau = $materiaux[mt_rand(0, count($materiaux) - 1)];
-            $age = mt_rand(5, 65);
-            $etat = self::tirer($age > 40 ? ['bon' => 20, 'degrade' => 50, 'hors_service' => 30]
+            $materiau = $materiaux[$g->entier(0, count($materiaux) - 1)];
+            $age = $g->entier(5, 65);
+            $etat = self::tirer($g, $age > 40 ? ['bon' => 20, 'degrade' => 50, 'hors_service' => 30]
                 : ['bon' => 55, 'degrade' => 35, 'hors_service' => 10]);
-            $population = mt_rand(5, 60) * 1000;
-            [$gouvernorat, $commune] = $communes[mt_rand(0, count($communes) - 1)];
+            $population = $g->entier(5, 60) * 1000;
+            [$gouvernorat, $commune] = $communes[$g->entier(0, count($communes) - 1)];
 
             $cout = self::COUT_BASE[$type] * self::FACTEUR_MATERIAU[$materiau] * (1 + 0.008 * $age)
                 * self::FACTEUR_ETAT[$etat] * (1 + 0.25 * min(1, $population / 50000))
-                * exp(self::BRUIT * self::gauss());
+                * exp(self::BRUIT * $g->gauss());
             $cout = round($cout / 1000) * 1000;
 
             $exemples[] = [
                 'brut'        => ['type' => $type, 'materiau' => $materiau, 'age' => $age, 'etat' => $etat, 'population' => $population],
                 'cout'        => (float) $cout,
-                'source'      => self::source($cout, $etat, $gouvernorat),
+                'source'      => self::source($g, $cout, $etat, $gouvernorat),
                 'commune'     => $commune,
                 'gouvernorat' => $gouvernorat,
             ];
         }
-        mt_srand();
 
         return $exemples;
     }
 
     // Source de financement tirée selon des poids qui dépendent du projet
-    private static function source(float $cout, string $etat, string $gouvernorat): string
+    private static function source(GenerateurReproductible $g, float $cout, string $etat, string $gouvernorat): string
     {
         $region = \App\Services\Renovation\ModeleSourceAppris::region($gouvernorat);
-        $poids = ['Etat' => 30, 'municipalite' => 20, 'bailleur' => 20, 'don' => 5];
+        $poids = ['Etat' => 25, 'municipalite' => 15, 'bailleur' => 15, 'don' => 5];
 
         if ($cout >= 600000) {
-            $poids['bailleur'] += 45;
-            $poids['municipalite'] -= 15;
+            $poids['bailleur'] += 70;
+            $poids['municipalite'] -= 12;
             $poids['don'] -= 4;
         } elseif ($cout < 200000) {
-            $poids['municipalite'] += $region === 'Nord' ? 35 : 10;
-            $poids['don'] += 10;
+            $poids['municipalite'] += $region === 'Nord' ? 60 : 20;
+            $poids['don'] += 12;
             $poids['bailleur'] -= 12;
         }
         if ($etat === 'hors_service') {
-            $poids['Etat'] += 30;
+            $poids['Etat'] += 55;
         }
         if ($region !== 'Nord') {
-            $poids['bailleur'] += 18;
+            $poids['bailleur'] += 25;
         }
 
-        return self::tirer(array_map(fn ($p) => max(1, $p), $poids));
+        return self::tirer($g, array_map(fn ($p) => max(1, $p), $poids));
     }
 
-    private static function tirer(array $poids): string
+    private static function tirer(GenerateurReproductible $g, array $poids): string
     {
-        $r = mt_rand(1, array_sum($poids));
+        $r = $g->entier(1, array_sum($poids));
         foreach ($poids as $valeur => $p) {
             if (($r -= $p) <= 0) {
                 return $valeur;
@@ -137,12 +136,4 @@ class JeuEntrainementSynthetique
         return array_key_last($poids);
     }
 
-    // Loi normale centrée réduite (méthode de Box-Muller)
-    private static function gauss(): float
-    {
-        $u = max(1e-12, mt_rand() / mt_getrandmax());
-        $v = mt_rand() / mt_getrandmax();
-
-        return sqrt(-2 * log($u)) * cos(2 * M_PI * $v);
-    }
 }

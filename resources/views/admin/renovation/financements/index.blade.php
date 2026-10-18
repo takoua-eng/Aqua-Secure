@@ -67,8 +67,8 @@
         <div class="card-body border-bottom">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label">Projet</label>
-                    <select name="projet" class="form-select">
+                    <label class="form-label" for="f-projet">Projet</label>
+                    <select name="projet" id="f-projet" class="form-select">
                         <option value="">Tous les projets</option>
                         @foreach ($projets as $id => $titre)
                             <option value="{{ $id }}" @selected((string) request('projet') === (string) $id)>{{ $titre }}</option>
@@ -76,8 +76,8 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Source</label>
-                    <select name="source" class="form-select">
+                    <label class="form-label" for="f-source">Source</label>
+                    <select name="source" id="f-source" class="form-select">
                         <option value="">Toutes</option>
                         @foreach (\App\Models\Financement::SOURCES as $valeur => $libelle)
                             <option value="{{ $valeur }}" @selected(request('source') === $valeur)>{{ $libelle }}</option>
@@ -85,20 +85,20 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Origine</label>
-                    <select name="origine" class="form-select">
+                    <label class="form-label" for="f-origine">Origine</label>
+                    <select name="origine" id="f-origine" class="form-select">
                         <option value="">Toutes</option>
                         <option value="manuel" @selected(request('origine') === 'manuel')>Saisie manuelle</option>
                         <option value="scenario" @selected(request('origine') === 'scenario')>Scénario appliqué</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-1">
-                    <label class="form-label">Min (DT)</label>
-                    <input type="number" name="min" min="0" step="0.01" value="{{ request('min') }}" class="form-control">
+                    <label class="form-label" for="f-min">Min (DT)</label>
+                    <input type="number" name="min" id="f-min" min="0" step="0.01" value="{{ request('min') }}" class="form-control">
                 </div>
                 <div class="col-6 col-md-2">
-                    <label class="form-label">Max (DT)</label>
-                    <input type="number" name="max" min="0" step="0.01" value="{{ request('max') }}" class="form-control">
+                    <label class="form-label" for="f-max">Max (DT)</label>
+                    <input type="number" name="max" id="f-max" min="0" step="0.01" value="{{ request('max') }}" class="form-control">
                 </div>
                 <div class="col-md-2 d-flex gap-2">
                     <button class="btn btn-primary flex-fill"><i class="ti ti-filter me-1"></i> Filtrer</button>

@@ -212,34 +212,34 @@
             <div class="card-body">
                 <form method="GET" class="row g-2 align-items-end mb-3">
                     <div class="col-md-2">
-                        <label class="form-label">Type</label>
-                        <select name="type" class="form-select" required>
+                        <label class="form-label" for="f-type">Type</label>
+                        <select name="type" id="f-type" class="form-select" required>
                             @foreach (ReseauEau::TYPES as $v => $l)<option value="{{ $v }}" @selected(($essai['brut']['type'] ?? 'canalisation') === $v)>{{ $l }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Matériau</label>
-                        <select name="materiau" class="form-select">
+                        <label class="form-label" for="f-materiau">Matériau</label>
+                        <select name="materiau" id="f-materiau" class="form-select">
                             @foreach (ReseauEau::MATERIAUX as $v => $l)<option value="{{ $v }}" @selected(($essai['brut']['materiau'] ?? 'fonte') === $v)>{{ $l }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-1">
-                        <label class="form-label">Âge</label>
-                        <input type="number" name="age" min="0" max="120" class="form-control" value="{{ $essai['brut']['age'] ?? 45 }}">
+                        <label class="form-label" for="f-age">Âge</label>
+                        <input type="number" name="age" id="f-age" min="0" max="120" class="form-control" value="{{ $essai['brut']['age'] ?? 45 }}">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">État</label>
-                        <select name="etat" class="form-select">
+                        <label class="form-label" for="f-etat">État</label>
+                        <select name="etat" id="f-etat" class="form-select">
                             @foreach (ReseauEau::ETATS as $v => $l)<option value="{{ $v }}" @selected(($essai['brut']['etat'] ?? 'degrade') === $v)>{{ $l }}</option>@endforeach
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Population</label>
-                        <input type="number" name="population" min="0" step="1000" class="form-control" value="{{ $essai['brut']['population'] ?? 30000 }}">
+                        <label class="form-label" for="f-population">Population</label>
+                        <input type="number" name="population" id="f-population" min="0" step="1000" class="form-control" value="{{ $essai['brut']['population'] ?? 30000 }}">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label">Gouvernorat</label>
-                        <select name="gouvernorat" class="form-select">
+                        <label class="form-label" for="f-gouvernorat">Gouvernorat</label>
+                        <select name="gouvernorat" id="f-gouvernorat" class="form-select">
                             @foreach ($gouvernorats as $g)<option value="{{ $g }}" @selected(($essai['gouvernorat'] ?? 'Tunis') === $g)>{{ $g }}</option>@endforeach
                         </select>
                     </div>
@@ -314,7 +314,7 @@
                 ->push(['nom' => 'Barème actuel', 'mape' => $cout['bareme']['mape']])->values();
             $maxJs = max(array_column($cout['validation'], 'reel'));
         @endphp
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.0/dist/apexcharts.min.js" integrity="sha384-5u6RO0Q8xx8HD9yfm1MUPRgt4kTTlZxjJmXIFZxa5pEZy7U9XOtkAZgbF1fSYmsw" crossorigin="anonymous"></script>
         <script>
             (function () {
                 const points = @json($pointsJs);

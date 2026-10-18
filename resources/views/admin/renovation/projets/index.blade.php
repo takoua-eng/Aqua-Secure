@@ -42,12 +42,12 @@
         <div class="card-body border-bottom">
             <form method="GET" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label">Recherche</label>
-                    <input type="search" name="q" value="{{ request('q') }}" class="form-control" placeholder="Titre ou code réseau…">
+                    <label class="form-label" for="f-q">Recherche</label>
+                    <input type="search" name="q" id="f-q" value="{{ request('q') }}" class="form-control" placeholder="Titre ou code réseau…">
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Statut</label>
-                    <select name="statut" class="form-select">
+                    <label class="form-label" for="f-statut">Statut</label>
+                    <select name="statut" id="f-statut" class="form-select">
                         <option value="">Tous</option>
                         @foreach (\App\Models\ProjetRenovation::STATUTS as $valeur => $libelle)
                             <option value="{{ $valeur }}" @selected(request('statut') === $valeur)>{{ $libelle }}</option>
@@ -55,8 +55,8 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Zone</label>
-                    <select name="zone" class="form-select">
+                    <label class="form-label" for="f-zone">Zone</label>
+                    <select name="zone" id="f-zone" class="form-select">
                         <option value="">Toutes</option>
                         @foreach ($zones as $id => $libelle)
                             <option value="{{ $id }}" @selected((string) request('zone') === (string) $id)>{{ $libelle }}</option>
@@ -64,16 +64,16 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label">Financement</label>
-                    <select name="financement" class="form-select">
+                    <label class="form-label" for="f-financement">Financement</label>
+                    <select name="financement" id="f-financement" class="form-select">
                         <option value="">Tous</option>
                         <option value="avec" @selected(request('financement') === 'avec')>Avec financement</option>
                         <option value="sans" @selected(request('financement') === 'sans')>Sans financement</option>
                     </select>
                 </div>
                 <div class="col-md-1">
-                    <label class="form-label">Tri</label>
-                    <select name="tri" class="form-select">
+                    <label class="form-label" for="f-tri">Tri</label>
+                    <select name="tri" id="f-tri" class="form-select">
                         <option value="">Récents</option>
                         <option value="titre" @selected(request('tri') === 'titre')>Titre</option>
                         <option value="finance" @selected(request('tri') === 'finance')>Financé</option>
