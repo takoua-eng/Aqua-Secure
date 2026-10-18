@@ -24,6 +24,9 @@
                                         <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('surveillance.*') ? 'active' : '' }}" href="{{ route('surveillance.index') }}">Surveillance</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('incidents.*') ? 'active' : '' }}" href="{{ route('incidents.index') }}">Incidents</a>
+                    </li>
                 @endauth
 
                 {{-- Visiteur non connecté --}}
