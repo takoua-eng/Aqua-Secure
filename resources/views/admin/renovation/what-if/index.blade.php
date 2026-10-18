@@ -159,7 +159,7 @@
                                             terminé
                                         @elseif ($c['cout'] !== null)
                                             reste <x-renovation.montant :valeur="max(0, $c['cout'] - $c['finance'])" :decimales="0" />
-                                            {{ $c['cout_source'] === 'declare' ? '(devis)' : '(estimé)' }}
+                                            ({{ \App\Services\Renovation\ModeleCout::COURTS[$c['cout_source']] ?? 'estimé' }})
                                         @endif
                                     </span>
                                 </span>

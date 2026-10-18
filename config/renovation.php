@@ -19,5 +19,9 @@ return [
             'url'   => env('GROQ_URL', 'https://api.groq.com/openai/v1/chat/completions'),
         ],
         'delai' => 60,   // secondes
+
+        // Modèles entraînés (page « Modèles IA ») : ajouter l'historique synthétique documenté aux données de la base.
+        // Mettre à false quand la base contient assez de vrais devis et financements.
+        'jeu_synthetique' => (bool) env('RENOVATION_JEU_SYNTHETIQUE', true),
     ],
 ];

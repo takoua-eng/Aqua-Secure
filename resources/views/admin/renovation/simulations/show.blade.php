@@ -115,10 +115,15 @@
                         <select name="source" id="decision-source" class="form-select @error('source') is-invalid @enderror">
                             <option value="">— Choisir —</option>
                             @foreach (\App\Models\Financement::SOURCES as $valeur => $libelle)
-                                <option value="{{ $valeur }}" @selected(old('source') === $valeur)>{{ $libelle }}</option>
+                                <option value="{{ $valeur }}" @selected(old('source', $sourceSuggeree['source'] ?? null) === $valeur)>{{ $libelle }}</option>
                             @endforeach
                         </select>
                         <div class="invalid-feedback">{{ $errors->first('source') }}</div>
+                        @if ($sourceSuggeree)
+                            <div class="small text-secondary mt-1"><i class="ti ti-brain me-1"></i>Suggestion du modèle IA :
+                                <strong>{{ \App\Models\Financement::libelleSourceDe($sourceSuggeree['source']) }}</strong>
+                                ({{ $sourceSuggeree['part'] }} % pondéré par les montants). À vous de décider.</div>
+                        @endif
                     </div>
                     <div class="col-md-4">
                         <label class="form-label" for="decision-commentaire">Commentaire (obligatoire si rejet)</label>
@@ -261,7 +266,7 @@
                             </td>
                             <td><span class="badge bg-{{ \App\Services\Renovation\ScorePriorite::niveau($l['score'])['couleur'] }} text-white">{{ $l['score'] }}</span></td>
                             <td class="text-end text-nowrap"><x-renovation.montant :valeur="$l['cout']" :decimales="0" />
-                                <div><x-renovation.origine :type="$l['cout_source'] === 'declare' ? 'declare' : 'estime'" /></div></td>
+                                <div><x-renovation.origine :type="in_array($l['cout_source'], ['declare', 'predit'], true) ? $l['cout_source'] : 'estime'" /></div></td>
                             <td class="text-end"><x-renovation.montant :valeur="$l['finance']" :decimales="0" /></td>
                             <td class="text-end fw-bold {{ $l['propose'] > 0 ? 'text-teal' : 'text-secondary' }}"><x-renovation.montant :valeur="$l['propose']" /></td>
                             <td class="small text-nowrap">{{ number_format($l['avant_pct'], 1, ',', ' ') }} % → <strong>{{ number_format($l['apres_pct'], 1, ',', ' ') }} %</strong></td>

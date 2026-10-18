@@ -62,7 +62,7 @@
                             <div class="h2 mb-0"><x-renovation.montant :valeur="$finance" /></div>
                         </div>
                         <div class="col-sm-4">
-                            <div class="text-secondary small">Coût total <x-renovation.origine :type="$cout['source'] === 'declare' ? 'declare' : 'estime'" /></div>
+                            <div class="text-secondary small">Coût total <x-renovation.origine :type="in_array($cout['source'], ['declare', 'predit'], true) ? $cout['source'] : 'estime'" /></div>
                             <div class="h2 mb-0">
                                 @if ($cout['montant'] !== null) <x-renovation.montant :valeur="$cout['montant']" /> @else <span class="text-secondary">Inconnu</span> @endif
                             </div>
@@ -225,6 +225,30 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modèle IA entraîné : source de financement à solliciter --}}
+            @if ($recommandation)
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-brain me-1"></i> Source à solliciter</h3>
+                        <div class="card-actions"><x-renovation.origine type="predit" /></div>
+                    </div>
+                    <div class="card-body">
+                        @foreach ($recommandation['probabilites'] as $source => $proba)
+                            <div class="mb-2">
+                                <div class="d-flex small">
+                                    <span class="{{ $loop->first ? 'fw-bold' : '' }}">{{ \App\Models\Financement::libelleSourceDe($source) }}</span>
+                                    <span class="ms-auto">{{ number_format($proba, 0) }} %</span>
+                                </div>
+                                <div class="progress progress-xs"><div class="progress-bar bg-{{ \App\Models\Financement::couleurSourceDe($source) }}" style="width: {{ $proba }}%"></div></div>
+                            </div>
+                        @endforeach
+                        <div class="small text-secondary mt-2"><i class="ti ti-info-circle me-1"></i>{{ $recommandation['explication'] }}</div>
+                        <div class="small text-secondary">Modèle bayésien entraîné sur {{ $recommandation['n'] }} financements ·
+                            <a href="{{ route('admin.renovation.modeles') }}">voir ses performances</a></div>
+                    </div>
+                </div>
+            @endif
 
             {{-- Voix des citoyens : soutiens et questions (publiées seulement avec une réponse) --}}
             @if ($participation)

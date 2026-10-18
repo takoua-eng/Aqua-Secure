@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Renovation\EchangeFinancementsController;
 use App\Http\Controllers\Admin\Renovation\FinancementController;
+use App\Http\Controllers\Admin\Renovation\ModelesIAController;
 use App\Http\Controllers\Admin\Renovation\ProjetRenovationController;
 use App\Http\Controllers\Admin\Renovation\QuestionCitoyenneController;
 use App\Http\Controllers\Admin\Renovation\SimulationController;
@@ -38,6 +39,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ge
         ->middleware('throttle:10,1')->name('renovation.alertes-ia');
     Route::get('financement/rapport-mensuel', [TableauFinancierController::class, 'rapportMensuel'])
         ->middleware('throttle:10,1')->name('renovation.rapport-mensuel');
+
+    // Modèles IA entraînés sur les données (coût, source de financement)
+    Route::get('financement/modeles-ia', [ModelesIAController::class, 'index'])->name('renovation.modeles');
+    Route::post('financement/modeles-ia/entrainer', [ModelesIAController::class, 'entrainer'])
+        ->middleware('throttle:5,1')->name('renovation.modeles.entrainer');
 
     // Équité territoriale et comparatif des 24 gouvernorats
     Route::get('financement/territoires', [TerritoiresController::class, 'index'])->name('renovation.territoires');

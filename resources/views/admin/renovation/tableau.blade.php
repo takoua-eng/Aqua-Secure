@@ -186,7 +186,7 @@
                                         <td class="text-end">
                                             <x-renovation.montant :valeur="$p->totalFinance()" :decimales="0" />
                                             <div class="small text-secondary">sur <x-renovation.montant :valeur="$p->priorite['cout']['montant'] ?? 0" :decimales="0" />
-                                                {{ $p->priorite['cout']['source'] === 'declare' ? '(devis)' : '(estimé)' }}</div>
+                                                ({{ \App\Services\Renovation\ModeleCout::COURTS[$p->priorite['cout']['source']] ?? 'estimé' }})</div>
                                         </td>
                                         <td style="min-width: 9rem">
                                             <div class="d-flex align-items-center gap-2"

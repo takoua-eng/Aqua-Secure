@@ -16,6 +16,7 @@
         'calcule'    => ['Calculé', 'teal', 'calculator', 'Résultat calculé par le moteur (règles déterministes)'],
         'ia'         => ['IA', 'pink', 'sparkles', "Interprétation rédigée par l'IA : à vérifier"],
         'estime'     => ['Estimé', 'yellow', 'ruler-measure', 'Estimation selon un barème, pas un devis'],
+        'predit'     => ['Prédit (IA)', 'indigo', 'brain', 'Coût prédit par le modèle entraîné sur les devis (page « Modèles IA »), pas un devis'],
         'declare'    => ['Devis', 'green', 'file-certificate', 'Coût déclaré par le gestionnaire'],
         'regles'     => ['Mode secours', 'secondary', 'list-check', 'Texte rédigé par des règles fixes (sans IA)'],
     ];

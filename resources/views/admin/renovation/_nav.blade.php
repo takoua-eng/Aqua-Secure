@@ -8,6 +8,7 @@
         ['admin.whatif.pluriannuel', 'admin.whatif.pluriannuel', 'calendar-stats', 'Plan pluriannuel'],
         ['admin.simulations.index', 'admin.simulations.*', 'history', 'Simulations'],
         ['admin.renovation.territoires', 'admin.renovation.territoires', 'map-2', 'Territoires'],
+        ['admin.renovation.modeles', 'admin.renovation.modeles*', 'brain', 'Modèles IA'],
     ];
     $enAttente = auth()->user()->isAdmin() ? \App\Models\SimulationFinancement::where('statut', 'soumise')->count() : 0;
     // Questions de citoyens sans réponse (si la participation citoyenne est installée)

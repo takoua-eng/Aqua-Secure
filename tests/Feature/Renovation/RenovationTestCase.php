@@ -43,6 +43,10 @@ abstract class RenovationTestCase extends TestCase
         \App\Services\Renovation\ObservatoireCitoyen::oublier();
         \App\Services\Renovation\SignauxTerrain::oublier();
         \App\Services\Renovation\EquiteTerritoriale::oublier();
+        // Modèles entraînés : stockage de test vide (aucun fichier réel lu ni écrit)
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \App\Services\Renovation\ModeleCoutAppris::oublier();
+        \App\Services\Renovation\ModeleSourceAppris::oublier();
 
         $this->gestionnaire = User::factory()->create(['role' => 'gestionnaire']);
         $this->admin = User::factory()->create(['role' => 'admin']);

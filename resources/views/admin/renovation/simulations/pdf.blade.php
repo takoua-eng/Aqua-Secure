@@ -70,7 +70,7 @@
                     <td>{{ $l['titre'] }}</td>
                     <td>{{ $l['reseau'] }}</td>
                     <td>{{ $l['score'] }}/100</td>
-                    <td class="droite">{{ $dt($l['cout']) }}<br><span class="gris">{{ $l['cout_source'] === 'declare' ? 'devis' : 'estimé' }}</span></td>
+                    <td class="droite">{{ $dt($l['cout']) }}<br><span class="gris">{{ \App\Services\Renovation\ModeleCout::COURTS[$l['cout_source']] ?? 'estimé' }}</span></td>
                     <td class="droite">{{ $dt($l['finance']) }}</td>
                     <td class="droite"><strong>{{ $dt($l['propose'], 2) }}</strong></td>
                     <td>{{ ['complet' => 'Financé en entier', 'partiel' => 'Partiel', 'aucun' => 'Non financé'][$l['etat']] }}</td>

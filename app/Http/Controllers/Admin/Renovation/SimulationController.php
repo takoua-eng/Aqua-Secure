@@ -82,9 +82,36 @@ class SimulationController extends Controller
         $simulation->load(['auteur:id,nom', 'decideur:id,nom', 'financements']);
 
         return view('admin.renovation.simulations.show', [
-            'simulation' => $simulation,
-            'ecarts'     => in_array($simulation->statut, ['brouillon', 'soumise', 'approuvee'], true) ? $this->ecarts($simulation) : [],
+            'simulation'     => $simulation,
+            'ecarts'         => in_array($simulation->statut, ['brouillon', 'soumise', 'approuvee'], true) ? $this->ecarts($simulation) : [],
+            'sourceSuggeree' => $simulation->statut === 'soumise' ? $this->sourceSuggeree($simulation) : null,
         ]);
+    }
+
+    /**
+     * Modèle IA entraîné : source la plus probable pour l'ensemble du scénario
+     * (probabilités de chaque projet pondérées par le montant proposé). Simple suggestion pour l'administrateur.
+     */
+    private function sourceSuggeree(SimulationFinancement $simulation): ?array
+    {
+        $lignes = collect($simulation->scenarioRetenu()['lignes'] ?? [])->where('propose', '>', 0);
+        $projets = ProjetRenovation::with('reseau.zone')->whereIn('id', $lignes->pluck('id'))->get()->keyBy('id');
+        $cumul = [];
+
+        foreach ($lignes as $l) {
+            $r = $projets->has($l['id']) ? \App\Services\Renovation\ModeleSourceAppris::recommander($projets[$l['id']]) : null;
+            foreach ($r['probabilites'] ?? [] as $source => $proba) {
+                $cumul[$source] = ($cumul[$source] ?? 0) + $proba * $l['propose'];
+            }
+        }
+        if (! $cumul) {
+            return null;
+        }
+
+        arsort($cumul);
+        $total = array_sum($cumul);
+
+        return ['source' => array_key_first($cumul), 'part' => round(100 * reset($cumul) / $total)];
     }
 
     // Analyse IA du scénario enregistré (stockée avec la simulation, clairement marquée comme interprétation)

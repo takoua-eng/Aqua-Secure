@@ -63,14 +63,16 @@ class ScorePriorite
         } else {
             $part = max(0.0, min(1.0, ($cout - $finance) / $cout));
             $pct = (int) round($part * 100);
-            $nature = $sourceCout === 'declare' ? 'déclaré' : 'estimé';
+            $nature = ['declare' => 'déclaré', 'predit' => 'prédit par le modèle IA'][$sourceCout] ?? 'estimé';
             $facteurs[] = [
                 'libelle' => "Reste à financer : {$pct} % du coût {$nature}",
                 'points'  => (int) round(25 * $part),
                 'max'     => 25,
             ];
             if ($sourceCout !== 'declare') {
-                $limites[] = 'Le reste à financer repose sur un coût estimé (barème), pas sur un devis.';
+                $limites[] = $sourceCout === 'predit'
+                    ? 'Le reste à financer repose sur un coût prédit par le modèle IA, pas sur un devis.'
+                    : 'Le reste à financer repose sur un coût estimé (barème), pas sur un devis.';
             }
         }
 

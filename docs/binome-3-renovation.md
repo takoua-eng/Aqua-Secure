@@ -158,6 +158,23 @@ php artisan db:seed --class=RenovationTunisieSeeder  # 24 projets publiés, un p
 | Panneau de chantier A4 avec QR code vers la page publique | fiche projet › « Panneau de chantier » | `projets/panneau.blade.php` |
 | Observatoire citoyen bilingue français / arabe (de droite à gauche, choix mémorisé) | `/renovation?langue=ar` | `lang/fr/observatoire.php`, `lang/ar/observatoire.php` |
 
+## Modèles IA entraînés (page `/admin/financement/modeles-ia`, gestionnaire et administrateur)
+
+Deux modèles d'**apprentissage automatique** codés en PHP sans bibliothèque (`app/Services/Renovation/Apprentissage/`),
+enregistrés dans `storage/app/private/modeles/` (fichiers non versionnés, aucune table) :
+
+| Modèle | Algorithme | Variables | Utilisé pour |
+|---|---|---|---|
+| Coût d'un projet sans devis | Régression Ridge ou k plus proches voisins (le meilleur est retenu) | type, matériau, âge, état du réseau, population | 3ᵉ niveau de coût : devis › **prédiction ± marge** › barème (fiche projet, What If?, score) |
+| Source de financement | Classifieur bayésien naïf (lissage de Laplace) | type, état, taille du projet, région | Carte « Source à solliciter » (fiche projet) et suggestion à l'approbation d'un scénario |
+
+- **Évaluation** : validation croisée « un contre tous », comparée à la méthode simple (barème ; « toujours la source la plus fréquente »).
+  Un modèle qui ne fait pas mieux est **désactivé automatiquement**. Contrôle d'honnêteté séparé sur les seuls devis de la base.
+- **Données** : la base + un **historique synthétique documenté** de 150 projets (`JeuEntrainementSynthetique`, graine fixe,
+  règles affichées sur la page), car les données de démonstration saisies à la main n'ont aucune régularité.
+  Avec de vrais devis : `RENOVATION_JEU_SYNTHETIQUE=false` dans le `.env`, puis réentraîner.
+- **Entraînement** : bouton « Réentraîner » de la page ou `php artisan renovation:entrainer` (à lancer une fois après installation).
+
 ## 7. Démonstration pour le jury (5 minutes)
 
 1. **Tableau financier** : montants réels par source, couverture calculée seulement sur les devis, alertes F1-F9,

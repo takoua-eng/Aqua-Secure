@@ -38,7 +38,8 @@ class SuiviBudget
         ])->values();
 
         $declares = $projets->filter(fn ($p) => $p->priorite['cout']['source'] === 'declare');
-        $estimes = $projets->filter(fn ($p) => $p->priorite['cout']['source'] === 'estime');
+        // Estimés = sans devis mais avec un coût (prédit par le modèle IA ou barème)
+        $estimes = $projets->filter(fn ($p) => in_array($p->priorite['cout']['source'], ['predit', 'estime'], true));
         $actifs = $projets->where('statut', '!=', 'termine');
 
         $coutDeclare = round($declares->sum(fn ($p) => $p->priorite['cout']['montant']), 2);

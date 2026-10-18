@@ -219,8 +219,10 @@
                     <div class="wi-raison">${e(l.raison)}</div>
                 </td>
                 <td><span class="badge bg-${couleurNiveau(l.score)} text-white">${l.score}</span></td>
-                <td class="text-end text-nowrap">${e(dtAuto(l.cout))}<div>${l.cout_source === 'declare'
-                    ? '<span class="badge bg-green-lt">Devis</span>' : '<span class="badge bg-yellow-lt">Estimé</span>'}</div></td>
+                <td class="text-end text-nowrap">${e(dtAuto(l.cout))}<div>${({
+                    declare: '<span class="badge bg-green-lt">Devis</span>',
+                    predit: '<span class="badge bg-indigo-lt" title="Prédit par le modèle entraîné (page Modèles IA)">Prédit IA</span>',
+                })[l.cout_source] || '<span class="badge bg-yellow-lt">Estimé</span>'}</div></td>
                 <td class="text-end text-nowrap">${e(dtAuto(l.finance))}</td>
                 <td class="text-end text-nowrap fw-bold ${l.propose > 0 ? 'text-teal' : 'text-secondary'}">${e(dtAuto(l.propose))}</td>
                 <td>

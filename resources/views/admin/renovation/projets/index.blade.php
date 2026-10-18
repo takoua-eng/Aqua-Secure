@@ -132,7 +132,7 @@
                                     </div>
                                     <div class="small text-secondary">
                                         de <x-renovation.montant :valeur="$cout['montant']" :decimales="0" />
-                                        {{ $cout['source'] === 'declare' ? '(devis)' : '(estimé)' }}
+                                        ({{ \App\Services\Renovation\ModeleCout::COURTS[$cout['source']] ?? 'estimé' }})
                                     </div>
                                 @else
                                     <span class="text-secondary small">Coût inconnu</span>

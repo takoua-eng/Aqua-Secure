@@ -102,6 +102,8 @@ class ProjetRenovationController extends Controller
             'finance'   => $projet->totalFinance(),
             'parSource' => $parSource,
             'alertes'   => DetectionRisquesFinanciers::pourProjet($projet->id),
+            // Modèle IA entraîné : source de financement à solliciter en priorité (projets non terminés)
+            'recommandation' => $projet->statut !== 'termine' ? \App\Services\Renovation\ModeleSourceAppris::recommander($projet) : null,
             // Participation citoyenne (si la migration correspondante a été exécutée)
             'participation' => $participation = \App\Services\Renovation\ObservatoireCitoyen::participationDisponible(),
             'soutiens'  => $participation ? $projet->soutiens()->count() : 0,
