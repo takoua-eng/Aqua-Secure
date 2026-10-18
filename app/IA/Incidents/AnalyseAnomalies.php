@@ -121,8 +121,8 @@ class AnalyseAnomalies
 
     private static function enregistrer(array $resultat): void
     {
-        Storage::disk('local')->put(self::FICHIER, json_encode($resultat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
+        Storage::disk('local')->put(self::FICHIER, json_encode($resultat, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION));
+            }
 
     // ---------- Explication ----------
 
