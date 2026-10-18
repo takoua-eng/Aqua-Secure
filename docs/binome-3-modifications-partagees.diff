@@ -1,0 +1,93 @@
+--- a/app/Http/Controllers/Admin/DashboardController.php
++++ b/app/Http/Controllers/Admin/DashboardController.php
+@@ -16,14 +16,14 @@
+             ['libelle' => 'Incidents ouverts', 'valeur' => 12, 'icone' => 'alert-triangle', 'couleur' => 'red'],
+             ['libelle' => 'Fuites signalées', 'valeur' => 7, 'icone' => 'droplet', 'couleur' => 'azure'],
+             ['libelle' => 'Infrastructures suivies', 'valeur' => ReseauEau::count(), 'icone' => 'building-factory-2', 'couleur' => 'green'],
+-            ['libelle' => 'Projets en cours', 'valeur' => 3, 'icone' => 'coin', 'couleur' => 'orange'],
++            ['libelle' => 'Projets en cours', 'valeur' => \App\Models\ProjetRenovation::where('statut', 'en_cours')->count(), 'icone' => 'coin', 'couleur' => 'orange'],
+         ];
+ 
+-        $projets = [
+-            ['nom' => 'Rénovation conduite principale', 'budget' => 450000, 'finance' => 340000],
+-            ['nom' => 'Décontamination réservoir R2', 'budget' => 180000, 'finance' => 60000],
+-            ['nom' => 'Forage de secours sécheresse', 'budget' => 300000, 'finance' => 150000],
+-        ];
++        // Projets réels avec un coût déclaré (devis) : seul cas où le pourcentage financé est fiable (binôme 3)
++        $projets = \App\Models\ProjetRenovation::where('cout_estime', '>', 0)->where('statut', '!=', 'termine')
++            ->withSum('financements', 'montant')->latest()->limit(3)->get()
++            ->map(fn ($p) => ['nom' => $p->titre, 'budget' => (float) $p->cout_estime, 'finance' => $p->totalFinance()])
++            ->all();
+ 
+         $incidents = [
+             ['date' => '15/10/2026', 'type' => 'fuite', 'localite' => 'Bab Saadoun', 'gravite' => 'moyenne', 'statut' => 'nouveau', 'lat' => 36.8090, 'lng' => 10.1590],
+--- a/app/Http/Controllers/Admin/ReseauEauController.php
++++ b/app/Http/Controllers/Admin/ReseauEauController.php
+@@ -78,6 +78,13 @@
+             ]);
+         }
+ 
++        // Un réseau qui a des projets de rénovation (binôme 3) ne peut pas être supprimé : ses financements sont des pièces comptables
++        if (\App\Models\ProjetRenovation::where('reseau_id', $reseau->id)->exists()) {
++            return back()->withErrors([
++                'reseau' => "Le réseau {$reseau->code} a des projets de rénovation : supprimez-les ou terminez-les d'abord.",
++            ]);
++        }
++
+         $reseau->delete();
+ 
+         return redirect()->route('admin.reseaux.index')->with('success', 'Réseau supprimé.');
+--- a/database/seeders/DatabaseSeeder.php
++++ b/database/seeders/DatabaseSeeder.php
+@@ -28,5 +28,7 @@
+     $this->call(SurveillanceSeeder::class);
+         // Risques et analyses de qualité de l'eau de démonstration (binôme 4)
+     $this->call(QualiteEauSeeder::class);
++        // Projets de rénovation et financements de démonstration (binôme 3)
++    $this->call(RenovationSeeder::class);
+ }
+ }
+--- a/resources/views/admin/partials/sidebar.blade.php
++++ b/resources/views/admin/partials/sidebar.blade.php
+@@ -24,6 +24,9 @@
+         ],
+         'Rénovation' => [
+             ['admin.projets.index', 'building', 'Projets de rénovation'],
++            ['admin.financements.index', 'coin', 'Financements'],
++            ['admin.renovation.tableau', 'chart-donut-3', 'Tableau financier'],
++            ['admin.whatif.index', 'adjustments-alt', 'What If? Engine'],
+         ],
+     ];
+ 
+--- a/resources/views/front/partials/header.blade.php
++++ b/resources/views/front/partials/header.blade.php
+@@ -13,7 +13,9 @@
+                 <li class="nav-item">
+                     <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Accueil</a>
+                 </li>
+-                <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#projets">Projets</a></li>
++                <li class="nav-item">
++                    <a class="nav-link {{ request()->routeIs('renovation.*') ? 'active' : '' }}" href="{{ route('renovation.index') }}">Rénovation</a>
++                </li>
+                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#carte">Carte</a></li>
+                 @auth
+                     <li class="nav-item">
+--- a/routes/web.php
++++ b/routes/web.php
+@@ -127,11 +127,13 @@
+         // url             nom de route      titre                     section             icône           description
+         ['incidents',      'incidents',      'Incidents',              'Exploitation',     'alert-triangle', 'Fuites, contaminations et coupures signalées.'],
+         ['interventions',  'interventions',  'Interventions',          'Exploitation',     'tool',           'Équipes envoyées sur le terrain et suivi des réparations.'],
+-        ['projets',        'projets',        'Projets de rénovation',  'Rénovation',       'building',       'Projets de rénovation et de décontamination, budget et financement.'],
+     ];
+ 
+     foreach ($modules as [$url, $nom, $titre, $section, $icone, $description]) {
+         Route::view($url, 'admin.placeholder', compact('titre', 'section', 'icone', 'description'))
+             ->name($nom . '.index');
+     }
+-});
+\ No newline at end of file
++});
++
++// ---------- Rénovation et financement (binôme 3) : CRUD, What If? Engine, page citoyenne ----------
++require __DIR__.'/renovation.php';
