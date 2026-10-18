@@ -1,7 +1,0 @@
-# =====================================================================
-# Espace de noms dédié à AquaSecure (séparé de hr-platform)
-# =====================================================================
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: aquasecure

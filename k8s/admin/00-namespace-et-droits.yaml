@@ -1,0 +1,49 @@
+# =====================================================================
+# À appliquer UNE SEULE FOIS par l'administrateur du cluster (pas par Jenkins) :
+#   kubectl apply -f k8s/admin/00-namespace-et-droits.yaml
+#
+# - crée l'espace de noms "aquasecure" (ressource du cluster : Jenkins n'a pas le droit de le faire)
+# - donne au compte de service de Jenkins (jenkins-deployer, du namespace hr-platform)
+#   le droit de déployer AquaSecure, uniquement dans le namespace "aquasecure"
+# Jenkins ne lit que les fichiers de k8s/ (pas ce sous-dossier).
+# =====================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aquasecure
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deploiement-aquasecure
+  namespace: aquasecure
+rules:
+  # Services, configuration, volumes, et lecture des pods (suivi du déploiement, journaux)
+  - apiGroups: [""]
+    resources: ["services", "configmaps", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events"]
+    verbs: ["get", "list", "watch"]
+  # Déploiements, MySQL, et historique des versions (rollout status / rollout undo)
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "replicasets", "controllerrevisions"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Point d'entrée HTTP
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-deployer-aquasecure
+  namespace: aquasecure
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-deployer
+    namespace: hr-platform
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: deploiement-aquasecure
