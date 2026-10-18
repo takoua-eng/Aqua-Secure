@@ -132,7 +132,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ge
     // Pages provisoires : chaque ligne sera remplacée par un contrôleur CRUD
     $modules = [
         // url             nom de route      titre                     section             icône           description
-        ['projets',       'projets',        'Projets de rénovation',  'Rénovation',       'building',       'Projets de rénovation et de décontamination, budget et financement.'],
+        ['incidents',      'incidents',      'Incidents',              'Exploitation',     'alert-triangle', 'Fuites, contaminations et coupures signalées.'],
+        ['interventions',  'interventions',  'Interventions',          'Exploitation',     'tool',           'Équipes envoyées sur le terrain et suivi des réparations.'],
     ];
 
     foreach ($modules as [$url, $nom, $titre, $section, $icone, $description]) {
@@ -140,3 +141,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ge
             ->name($nom . '.index');
     }
 });
+
+// ---------- Rénovation et financement (binôme 3) : CRUD, What If? Engine, page citoyenne ----------
+require __DIR__.'/renovation.php';
