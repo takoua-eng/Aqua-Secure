@@ -1,0 +1,17 @@
+# =====================================================================
+# Dossier storage/app partagé (ReadWriteMany sur NFS) :
+#   - public  : photos de profil des utilisateurs
+#   - private : modèles d'IA entraînés (contamination, rénovation, incidents)
+# L'application et le planificateur le lisent et l'écrivent depuis n'importe quel worker.
+# =====================================================================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: stockage
+  namespace: aquasecure
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 2Gi

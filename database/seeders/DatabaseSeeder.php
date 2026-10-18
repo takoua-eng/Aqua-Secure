@@ -28,5 +28,10 @@ public function run(): void
     $this->call(SurveillanceSeeder::class);
         // Risques et analyses de qualité de l'eau de démonstration (binôme 4)
     $this->call(QualiteEauSeeder::class);
+        // Incidents et interventions de démonstration (binôme 2)
+    $this->call(IncidentSeeder::class);
+    // Projets de rénovation et financements de démonstration (binôme 3)
+    $this->call(RenovationSeeder::class);
+    $this->call(RenovationTunisieSeeder::class);
 }
 }
