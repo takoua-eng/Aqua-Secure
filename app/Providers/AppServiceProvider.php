@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\URL; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
 
 public function boot(): void
 {
+    // En production (Kubernetes derrière l'Ingress sur le port 30080), tous les liens et
+    // redirections utilisent APP_URL : le port n'est jamais perdu, quels que soient les en-têtes du proxy.
+    if ($this->app->environment('production') && filled(config('app.url'))) {
+        URL::forceRootUrl(config('app.url'));
+    }
     Paginator::useBootstrapFive();
             // Email de réinitialisation du mot de passe, en français
         ResetPassword::toMailUsing(function ($notifiable, string $token) {
