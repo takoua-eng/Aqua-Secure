@@ -167,6 +167,8 @@ pipeline {
                     rm -rf livrable
                 '''
                 archiveArtifacts artifacts: "aquasecure-${env.IMAGE_TAG}.tar.gz", fingerprint: true
+                                // L'archive est conservée par Jenkins : on la retire de l'espace de travail
+                sh 'rm -f aquasecure-*.tar.gz'
             }
         }
 
