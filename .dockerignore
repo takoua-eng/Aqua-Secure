@@ -23,3 +23,10 @@ k8s
 Jenkinsfile
 docker-compose.yml
 *.log
+# Fichiers produits par Jenkins dans l'espace de travail : jamais dans l'image
+*.tar.gz
+livrable/
+.sonar/
+.scannerwork/
+junit.xml
+coverage.xml
