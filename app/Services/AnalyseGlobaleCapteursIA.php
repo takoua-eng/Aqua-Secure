@@ -48,8 +48,7 @@ class AnalyseGlobaleCapteursIA
             return self::rapportDemo($donnees);
         }
 
-        $cle = 'analyse-globale-capteurs:' . md5(json_encode($donnees));
-
+        $cle = 'analyse-globale-capteurs:' . hash('sha256', json_encode($donnees));
         return Cache::remember($cle, now()->addHour(), fn () => self::appelerClaude($donnees));
     }
 

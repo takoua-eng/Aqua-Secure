@@ -55,8 +55,7 @@ class AnalyseZoneIA
         $donnees = self::donnees($zone);
 
         // Même données = même rapport : on évite de repayer un appel identique
-        $cle = 'analyse-ia:zone:' . $zone->id . ':' . md5(json_encode($donnees));
-
+$cle = 'analyse-zone:' . $zone->id . ':' . hash('sha256', json_encode($donnees));
         return Cache::remember($cle, now()->addDay(), fn () => self::appelerClaude($donnees));
     }
 

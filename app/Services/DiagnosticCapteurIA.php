@@ -51,8 +51,7 @@ class DiagnosticCapteurIA
         }
 
         // Mêmes données = même diagnostic : on évite de repayer un appel identique
-        $cle = 'diagnostic-ia:capteur:' . $capteur->id . ':' . md5(json_encode($donnees));
-
+        $cle = 'diagnostic-ia:capteur:' . $capteur->id . ':' . hash('sha256', json_encode($donnees));
         return Cache::remember($cle, now()->addDay(), fn () => self::appelerClaude($donnees));
     }
 
