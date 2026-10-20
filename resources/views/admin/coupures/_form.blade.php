@@ -66,7 +66,9 @@
 </div>
 
 @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+    {{-- integrity : le navigateur refuse le fichier s'il a été modifié sur le CDN (empreinte SHA-384) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css"
+          integrity="sha384-piG3EtH1fBnPi68q4spy+Qgpb0dHK1D1dwk0GaHwFkvmUxYi526bBlk3xJcjEBsD" crossorigin="anonymous">
     <style>
         .ts-wrapper.is-invalid .ts-control { border-color: var(--tblr-danger); }
         .ts-wrapper.is-valid .ts-control { border-color: var(--tblr-success); }
@@ -75,7 +77,8 @@
 @endpush
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"
+            integrity="sha384-cnROoUgVILyibe3J0zhzWoJ9p2WmdnK7j/BOTSWqVDbC1pVw2d+i6Q/1ESKJKCYf" crossorigin="anonymous"></script>
     <script src="{{ asset('js/select-recherche.js') }}"></script>
     <script>
         // La fin doit suivre le début et ne pas dépasser 7 jours : bornes mises à jour pendant la saisie

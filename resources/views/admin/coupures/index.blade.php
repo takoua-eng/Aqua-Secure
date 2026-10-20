@@ -9,13 +9,16 @@
 @section('actions')
     <div class="d-flex flex-wrap gap-2">
         <form method="GET" class="d-flex flex-wrap gap-2">
-            <select name="statut" class="form-select" onchange="this.form.submit()">
+            {{-- Étiquettes invisibles à l'écran mais lues par les lecteurs d'écran (accessibilité) --}}
+            <label for="filtre-statut" class="visually-hidden">Filtrer par statut</label>
+            <select name="statut" id="filtre-statut" class="form-select" onchange="this.form.submit()">
                 <option value="">Tous les statuts</option>
                 @foreach (\App\Models\CoupureProgrammee::STATUTS as $cle => [$libelle])
                     <option value="{{ $cle }}" @selected(request('statut') === $cle)>{{ $libelle }}</option>
                 @endforeach
             </select>
-            <select name="zone" class="form-select" onchange="this.form.submit()">
+            <label for="filtre-zone" class="visually-hidden">Filtrer par zone</label>
+            <select name="zone" id="filtre-zone" class="form-select" onchange="this.form.submit()">
                 <option value="">Toutes les zones</option>
                 @foreach ($zones as $id => $libelle)
                     <option value="{{ $id }}" @selected((string) request('zone') === (string) $id)>{{ $libelle }}</option>
