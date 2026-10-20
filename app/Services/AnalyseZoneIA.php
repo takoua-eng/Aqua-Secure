@@ -15,10 +15,15 @@ use Illuminate\Support\Str;
 use RuntimeException;
 
 /*
- * Rapport d'analyse d'une zone rédigé par l'IA (Claude, API Anthropic).
- * On envoie les données de la zone (réseaux, scores de risque, historique, groupe K-means)
- * et Claude renvoie un diagnostic en français avec des actions priorisées.
- * Le rapport est gardé en cache tant que les données de la zone ne changent pas.
+ * Rapport d'analyse d'une zone rédigé par l'IA.
+ * On envoie les données de la zone (réseaux, scores de risque, prédictions Weibull, historique, groupe K-means)
+ * et le modèle renvoie un diagnostic en français avec des actions priorisées.
+ *
+ * Fournisseur, dans cet ordre (mêmes clés que le module Rénovation, voir config/renovation.php) :
+ *   1. Groq (gratuit) si GROQ_API_KEY est renseignée ;
+ *   2. Claude (Anthropic) si ANTHROPIC_API_KEY est renseignée ;
+ *   3. sinon, ou si l'IA est indisponible : rapport de secours rédigé par des règles (mode démo).
+ * Un rapport IA est gardé en cache tant que les données de la zone ne changent pas.
  */
 class AnalyseZoneIA
 {
@@ -47,16 +52,43 @@ class AnalyseZoneIA
      */
     public static function analyser(Zone $zone): array
     {
-        // Pas de clé API (compte payant) : rapport de démonstration rédigé par des règles, sans IA
-        if (blank(config('services.anthropic.key'))) {
+        $fournisseur = self::fournisseur();
+
+        // Aucune clé d'IA : rapport de démonstration rédigé par des règles
+        if ($fournisseur === 'demo') {
             return self::rapportDemo($zone);
         }
 
         $donnees = self::donnees($zone);
 
-        // Même données = même rapport : on évite de repayer un appel identique
-$cle = 'analyse-zone:' . $zone->id . ':' . hash('sha256', json_encode($donnees));
-        return Cache::remember($cle, now()->addDay(), fn () => self::appelerClaude($donnees));
+        // Même données = même rapport : on évite de refaire un appel identique (et de consommer le quota)
+        $cle = 'analyse-zone:' . $fournisseur . ':' . $zone->id . ':' . hash('sha256', json_encode($donnees));
+        if ($rapport = Cache::get($cle)) {
+            return $rapport;
+        }
+
+        try {
+            $rapport = $fournisseur === 'groq' ? self::appelerGroq($donnees) : self::appelerClaude($donnees);
+        } catch (RuntimeException $e) {
+            // IA indisponible (quota, réseau, clé…) : on affiche quand même le rapport de secours, en le signalant
+            Log::warning('Analyse IA de zone indisponible', ['fournisseur' => $fournisseur, 'raison' => $e->getMessage()]);
+
+            return self::rapportDemo($zone) + ['avertissement' => $e->getMessage()];
+        }
+
+        Cache::put($cle, $rapport, now()->addDay());   // seul un vrai rapport est mis en cache
+
+        return $rapport;
+    }
+
+    // Fournisseur d'IA utilisé : groq, anthropic, ou demo (aucune clé)
+    public static function fournisseur(): string
+    {
+        return match (true) {
+            filled(config('renovation.ia.groq.key'))  => 'groq',
+            filled(config('services.anthropic.key')) => 'anthropic',
+            default                                  => 'demo',
+        };
     }
 
     // Données envoyées à Claude (rien de personnel : seulement l'infrastructure de la zone)
@@ -189,6 +221,81 @@ $cle = 'analyse-zone:' . $zone->id . ':' . hash('sha256', json_encode($donnees))
         ];
     }
 
+    /*
+     * Groq (gratuit, API au format OpenAI) : même consigne que pour Claude, réponse en Markdown.
+     * Offre gratuite : quota par minute et par modèle ; en cas de quota atteint (429), on réessaie
+     * une fois avec le modèle de relais (GROQ_MODEL_RELAIS), comme le module Rénovation.
+     */
+    private static function appelerGroq(array $donnees): array
+    {
+        $modele = config('renovation.ia.groq.model');
+        $corps = [
+            'model'                 => $modele,
+            'temperature'           => 0.3,
+            'max_completion_tokens' => 2000,
+            'reasoning_effort'      => 'low',
+            'messages'              => [
+                ['role' => 'system', 'content' => self::SYSTEME],
+                ['role' => 'user', 'content' => self::consigne($donnees)],
+            ],
+        ];
+
+        $reponse = self::requeteGroq($corps);
+
+        $relais = config('renovation.ia.groq.model_relais');
+        if (in_array($reponse->status(), [413, 429], true) && filled($relais) && $relais !== $modele) {
+            $corps['model'] = $modele = $relais;
+            $reponse = self::requeteGroq($corps);
+        }
+
+        match (true) {
+            $reponse->successful()     => null,
+            $reponse->status() === 401 => throw new RuntimeException('La clé GROQ_API_KEY est invalide : vérifiez-la dans le fichier .env.'),
+            $reponse->status() === 429 => throw new RuntimeException("Quota gratuit de l'IA atteint : réessayez dans une minute."),
+            default                    => throw new RuntimeException("Le service d'IA a renvoyé une erreur ({$reponse->status()})."),
+        };
+
+        $choix = $reponse->json('choices.0');
+        $texte = trim((string) ($choix['message']['content'] ?? ''));
+
+        if (($choix['finish_reason'] ?? null) === 'length' || $texte === '') {
+            throw new RuntimeException("La réponse de l'IA est vide ou incomplète.");
+        }
+
+        return self::resultatIA($texte, ($reponse->json('model') ?? $modele) . ' (Groq)');
+    }
+
+    private static function requeteGroq(array $corps): \Illuminate\Http\Client\Response
+    {
+        try {
+            return \Illuminate\Support\Facades\Http::withToken(config('renovation.ia.groq.key'))
+                ->acceptJson()
+                ->connectTimeout(10)
+                ->timeout(config('renovation.ia.delai', 60))
+                ->post(config('renovation.ia.groq.url'), $corps);
+        } catch (\Illuminate\Http\Client\ConnectionException) {
+            throw new RuntimeException("Le service d'IA est injoignable (connexion Internet ou délai dépassé).");
+        }
+    }
+
+    // Message envoyé au modèle : la demande + les données de la zone en JSON
+    private static function consigne(array $donnees): string
+    {
+        return "Analyse cette zone et propose un plan d'action.\n\n```json\n"
+            . json_encode($donnees, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            . "\n```";
+    }
+
+    // Le Markdown du modèle devient du HTML ; tout HTML brut éventuel est échappé
+    private static function resultatIA(string $texte, string $modele): array
+    {
+        return [
+            'html'     => Str::markdown($texte, ['html_input' => 'escape', 'allow_unsafe_links' => false]),
+            'genereLe' => now()->format('d/m/Y à H:i'),
+            'modele'   => $modele,
+        ];
+    }
+
     private static function appelerClaude(array $donnees): array
     {
         $cleApi = config('services.anthropic.key');
@@ -200,12 +307,7 @@ $cle = 'analyse-zone:' . $zone->id . ':' . hash('sha256', json_encode($donnees))
                 model: $modele,
                 maxTokens: 16000,
                 system: self::SYSTEME,
-                messages: [[
-                    'role'    => 'user',
-                    'content' => "Analyse cette zone et propose un plan d'action.\n\n```json\n"
-                        . json_encode($donnees, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
-                        . "\n```",
-                ]],
+                messages: [['role' => 'user', 'content' => self::consigne($donnees)]],
                 outputConfig: ['effort' => 'medium'],
                 // Si le modèle refuse la demande, l'API la relance automatiquement sur un modèle de secours
                 fallbacks: 'default',
@@ -235,11 +337,6 @@ $cle = 'analyse-zone:' . $zone->id . ':' . hash('sha256', json_encode($donnees))
             throw new RuntimeException("L'IA n'a renvoyé aucun texte. Réessayez.");
         }
 
-        return [
-            // Le Markdown de Claude devient du HTML ; tout HTML brut éventuel est échappé
-            'html'     => Str::markdown($texte, ['html_input' => 'escape', 'allow_unsafe_links' => false]),
-            'genereLe' => now()->format('d/m/Y à H:i'),
-            'modele'   => $reponse->model,
-        ];
+        return self::resultatIA($texte, (string) $reponse->model);
     }
 }
