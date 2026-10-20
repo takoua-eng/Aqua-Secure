@@ -54,6 +54,12 @@
             </form>
         </div>
 
+        {{-- Ma zone : avis de coupure d'eau programmée --}}
+        <div class="card border-0 shadow-sm p-4 mb-4" id="ma-zone">
+            <h2 class="h5 fw-semibold mb-3">Ma zone</h2>
+            @include('front.partials.ma-zone')
+        </div>
+
         {{-- 2. Mot de passe --}}
         <div class="card border-0 shadow-sm p-4">
             <h2 class="h5 fw-semibold mb-3">Mot de passe</h2>

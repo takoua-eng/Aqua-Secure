@@ -82,6 +82,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->photo ? asset('storage/' . $this->photo) : null;
     }
 
+    // Zone d'habitation (citoyen) : il est prévenu des coupures programmées dans cette zone.
+    // zone_id n'est pas dans $fillable : il ne se change que par l'action dédiée "Ma zone".
+    public function zone(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Zone::class);
+    }
+
     // 2FA activée ET confirmée par un premier code
     public function aDoubleAuthentification(): bool
     {

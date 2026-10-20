@@ -17,6 +17,10 @@
                     <a class="nav-link {{ request()->routeIs('renovation.*') ? 'active' : '' }}" href="{{ route('renovation.index') }}">Rénovation</a>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#carte">Carte</a></li>
+                {{-- Coupures programmées et commentaires des citoyens (module Infrastructure) : page publique --}}
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('coupures.*') ? 'active' : '' }}" href="{{ route('coupures.index') }}">Coupures</a>
+                </li>
                 @auth
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('qualite.*') ? 'active' : '' }}" href="{{ route('qualite.index') }}">Qualité de l'eau</a>

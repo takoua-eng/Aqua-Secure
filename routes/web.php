@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\ReseauEauController;
 use App\Http\Controllers\Admin\ReseauImportController;
 use App\Http\Controllers\Admin\RisqueController;
 use App\Http\Controllers\Admin\ZoneController;
+use App\Http\Controllers\Admin\CommentaireController;
+use App\Http\Controllers\Admin\CoupureController;
+use App\Http\Controllers\Front\CoupureController as FrontCoupureController;
 use App\Http\Controllers\Admin\CapteurController;
 use App\Http\Controllers\Admin\ReleveController;
 use App\Http\Controllers\Front\SurveillanceController;
@@ -28,6 +31,14 @@ Route::middleware(['auth', 'verified', 'role:citoyen'])->group(function () {
     Route::post('/signaler', [SignalementController::class, 'store'])->name('signalement.store');
 });
 
+// Coupures programmées (module Infrastructure) : page publique, les commentaires s'affichent à tous ;
+// écrire un commentaire et aimer : citoyens connectés uniquement
+Route::get('/coupures', [FrontCoupureController::class, 'index'])->name('coupures.index');
+Route::middleware(['auth', 'verified', 'role:citoyen', 'throttle:20,1'])->group(function () {
+    Route::post('/coupures/{coupure}/commentaires', [FrontCoupureController::class, 'commenter'])->name('coupures.commenter');
+    Route::post('/commentaires/{commentaire}/like', [FrontCoupureController::class, 'aimer'])->name('commentaires.like');
+});
+
 // Qualité de l'eau : consultation par les utilisateurs connectés (citoyens compris)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/qualite-eau', [QualiteEauController::class, 'index'])->name('qualite.index');
@@ -38,7 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Incidents et travaux (binôme 2) : consultation uniquement
     Route::get('/incidents', [IncidentPublicController::class, 'index'])->name('incidents.index');
     Route::get('/incidents/{incident}', [IncidentPublicController::class, 'show'])->name('incidents.show');
-    
+    // Coupures d'eau programmées (module Infrastructure) : choix de sa zone pour recevoir les avis par email
+    Route::put('/mon-compte/zone', [FrontCoupureController::class, 'choisirZone'])->name('compte.zone');
+
 });
 
 // ---------- Authentification : gérée par Laravel Fortify ----------
@@ -83,6 +96,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:ge
         ->except('show')
         ->parameters(['reseaux' => 'reseau']);
 
+    // Coupures programmées (travaux) : les citoyens de la zone sont prévenus
+    Route::post('coupures/{coupure}/annuler', [CoupureController::class, 'annuler'])->name('coupures.annuler');
+    // Modération des commentaires des citoyens (affichés dans "Voir détails" de chaque coupure)
+    Route::delete('commentaires/{commentaire}', [CommentaireController::class, 'destroy'])->name('commentaires.destroy');
+    Route::resource('coupures', CoupureController::class)
+        ->except('show')
+        ->parameters(['coupures' => 'coupure']);
     // Intelligence artificielle : score de risque, groupes de zones (K-means) et rapport IA
     Route::get('risques', [RisqueController::class, 'index'])->name('risques.index');
     Route::get('risques/pdf', [RisqueController::class, 'pdf'])->name('risques.pdf');

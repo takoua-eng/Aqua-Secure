@@ -30,7 +30,11 @@ window.analyserZone = async function (url, cible, bouton) {
         const origine = donnees.demo
             ? `<i class="ti ti-info-circle me-1"></i>Mode démo : rapport rédigé automatiquement à partir du score de risque, sans IA (aucune clé API configurée). Le ${echapper(donnees.genereLe)}.`
             : `<i class="ti ti-sparkles me-1"></i>Généré par IA (${echapper(donnees.modele)}) le ${echapper(donnees.genereLe)}. À vérifier par un gestionnaire.`;
-        cible.innerHTML = `<div class="rapport-ia">${donnees.html}</div>
+        // IA indisponible (quota, réseau…) : le rapport de secours est affiché, avec la raison
+        const avertissement = donnees.avertissement
+            ? `<div class="alert alert-warning py-2 small"><i class="ti ti-alert-circle me-1"></i>IA indisponible (${echapper(donnees.avertissement)}) : rapport de secours affiché.</div>`
+            : '';
+        cible.innerHTML = `${avertissement}<div class="rapport-ia">${donnees.html}</div>
             <div class="small text-secondary mt-2">${origine}</div>`;
     } catch (e) {
         cible.innerHTML = '<div class="alert alert-warning mb-0">Connexion au serveur impossible.</div>';

@@ -7,6 +7,7 @@
         'Infrastructure' => [
             ['admin.zones.index', 'map', 'Zones'],
             ['admin.reseaux.index', 'share', 'Réseaux'],
+            ['admin.coupures.index', 'calendar-off', 'Coupures programmées'],
             ['admin.risques.index', 'brain', 'Analyse des risques'],
         ],
         'Exploitation' => [
