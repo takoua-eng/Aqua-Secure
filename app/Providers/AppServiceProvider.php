@@ -24,11 +24,23 @@ class AppServiceProvider extends ServiceProvider
 
 public function boot(): void
 {
-    // En production (Kubernetes derrière l'Ingress sur le port 30080), tous les liens et
-    // redirections utilisent APP_URL : le port n'est jamais perdu, quels que soient les en-têtes du proxy.
-    if ($this->app->environment('production') && filled(config('app.url'))) {
-        URL::forceRootUrl(config('app.url'));
-    }
+        // En production (Kubernetes derrière l'Ingress sur le port 30080) :
+        // l'adresse publique vient de APP_URL, pas des en-têtes du proxy.
+        if ($this->app->environment('production') && filled(config('app.url'))) {
+            // 1. Liens générés (route(), url(), redirections, liens signés)
+            URL::forceRootUrl(config('app.url'));
+
+            // 2. Requête reçue (pagination, vérification des liens signés) :
+            //    on lui donne l'hôte et le port de APP_URL
+            $racine = parse_url(config('app.url'));
+            $hote = $racine['host'] . (isset($racine['port']) ? ':' . $racine['port'] : '');
+
+            $requete = $this->app['request'];
+            $requete->headers->set('Host', $hote);
+            $requete->server->set('HTTP_HOST', $hote);
+            $requete->headers->remove('X-Forwarded-Host');
+            $requete->headers->remove('X-Forwarded-Port');
+        }
     Paginator::useBootstrapFive();
             // Email de réinitialisation du mot de passe, en français
         ResetPassword::toMailUsing(function ($notifiable, string $token) {
