@@ -23,7 +23,10 @@ class AlerteCapteur
     public static function envoyer(Releve $releve, ?array $anomalie = null): bool
     {
         // Cache::add ne réussit que si la clé n'existe pas encore : une seule alerte par heure et par capteur
-        if (! Cache::add('alerte-capteur:' . $releve->capteur_id, true, now()->addMinutes(self::DELAI_MINUTES))) {
+        // Une clé par mode d'envoi : les alertes du simulateur (écrites dans les logs)
+        // ne bloquent plus les vraies alertes email saisies dans le back office
+        $cle = 'alerte-capteur:' . config('mail.default') . ':' . $releve->capteur_id;
+        if (! Cache::add($cle, true, now()->addMinutes(self::DELAI_MINUTES))) {
             return false;
         }
 
