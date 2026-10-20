@@ -4,6 +4,9 @@
 
 @section('content')
 
+{{-- Avis de coupure d'eau dans la zone du citoyen (module Infrastructure) --}}
+@include('front.partials.avis-coupure')
+
 {{-- Héros --}}
 <section class="hero">
     <div class="container">
