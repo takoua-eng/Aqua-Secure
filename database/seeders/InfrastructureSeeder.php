@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\ReseauEau;
+use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -77,6 +79,102 @@ class InfrastructureSeeder extends Seeder
                     $reseau->historiques()->where('nouvel_etat', $etat)
                         ->update(['created_at' => $date, 'updated_at' => $date]);
                 }
+            }
+        }
+
+        // Le citoyen de démonstration habite le centre-ville : il reçoit les avis de coupure de cette zone
+        User::where('email', 'citoyen@aquasecure.tn')
+            ->update(['zone_id' => Zone::where('nom', 'Centre-ville')->where('commune', 'Tunis')->value('id')]);
+
+        $this->coupures();
+    }
+
+    // Coupures programmées de démonstration : une à venir, une en cours, une terminée, une annulée
+    private function coupures(): void
+    {
+        $demain = Carbon::tomorrow();
+        $coupures = [
+            ['RES-TUN-001', 'Nettoyage et désinfection du réservoir', 'Des citernes seront installées place Pasteur.',
+                $demain->copy()->addDays(2)->setTime(8, 0), $demain->copy()->addDays(2)->setTime(16, 0), false],
+            ['CAN-HLF-001', 'Remplacement d\'un tronçon de canalisation en fonte', null,
+                Carbon::now()->subHours(2)->startOfHour(), Carbon::now()->addHours(6)->startOfHour(), false],
+            ['CAN-MAR-001', 'Raccordement d\'un nouveau lotissement', null,
+                Carbon::now()->subDays(6)->setTime(9, 0), Carbon::now()->subDays(6)->setTime(13, 0), false],
+            ['CAN-TUN-002', 'Pose d\'un compteur de sectorisation', null,
+                $demain->copy()->addDays(5)->setTime(9, 0), $demain->copy()->addDays(5)->setTime(12, 0), true],
+        ];
+
+        foreach ($coupures as [$code, $motif, $description, $debut, $fin, $annulee]) {
+            $reseau = ReseauEau::where('code', $code)->first();
+            if (! $reseau || $reseau->coupures()->where('motif', $motif)->exists()) {
+                continue;
+            }
+
+            $coupure = $reseau->coupures()->create(compact('motif', 'description', 'debut', 'fin'));
+            if ($annulee) {
+                $coupure->forceFill(['annulee_le' => now()])->save();
+            }
+        }
+
+        $this->commentaires();
+    }
+
+    // Commentaires et "j'aime" des citoyens de démonstration sur les coupures
+    private function commentaires(): void
+    {
+        // Citoyen de démonstration + quelques habitants (mot de passe "password", email déjà vérifié)
+        $demo = User::where('email', 'citoyen@aquasecure.tn')->first();
+        if (! $demo) {
+            return; // seeder lancé sans les comptes de démonstration (ex. dans les tests) : rien à créer
+        }
+
+        $habitants = collect([
+            'Salma Ben Ali', 'Youssef Trabelsi', 'Amira Gharbi', 'Mehdi Jaziri',
+            'Ines Bouazizi', 'Karim Mansouri', 'Rania Chaabane',
+        ])->map(function (string $nom) {
+            $email = str($nom)->lower()->ascii()->replace(' ', '.') . '@exemple.tn';
+            $user = User::firstOrCreate(['email' => $email], ['nom' => $nom, 'password' => 'password', 'role' => 'citoyen']);
+            $user->forceFill(['email_verified_at' => now()])->save();
+
+            return $user;
+        });
+
+        $citoyens = collect([$demo])->merge($habitants)->values();
+
+        // motif de la coupure => [ [n° du citoyen, texte, nombre de "j'aime", publié il y a (heures)] ]
+        $donnees = [
+            'Nettoyage et désinfection du réservoir' => [
+                [0, "Merci pour l'avis ! Est-ce que les citernes seront aussi installées rue de Marseille ?", 3, 20],
+                [1, 'Pensez à remplir vos bouteilles la veille : la dernière fois, la coupure a duré plus longtemps que prévu.', 5, 14],
+                [2, "Très bonne initiative de prévenir trois jours avant, ça change tout pour s'organiser.", 2, 6],
+            ],
+            'Remplacement d\'un tronçon de canalisation en fonte' => [
+                [3, "Plus d'eau depuis 21 h rue Ibn Khaldoun, c'est bien lié à ces travaux ?", 4, 2],
+                [4, 'La pression était déjà très faible au 2e étage avant la coupure, espérons que ça règle le problème.', 1, 1],
+                [5, 'Courage aux équipes qui travaillent de nuit !', 6, 1],
+            ],
+            'Raccordement d\'un nouveau lotissement' => [
+                [6, "L'eau est revenue vers 13 h 30, merci d'avoir respecté les horaires.", 2, 140],
+                [7, "Eau un peu trouble pendant dix minutes au retour : laissez couler le robinet avant de la boire.", 3, 139],
+                [1, "Travaux propres, et il n'y a plus de fuite devant l'école.", 1, 130],
+            ],
+        ];
+
+        foreach ($donnees as $motif => $commentaires) {
+            $coupure = \App\Models\CoupureProgrammee::where('motif', $motif)->first();
+            if (! $coupure || $coupure->commentaires()->exists()) {
+                continue;
+            }
+
+            foreach ($commentaires as [$n, $texte, $nbLikes, $ilYa]) {
+                $auteur = $citoyens[$n % $citoyens->count()];
+                $commentaire = $coupure->commentaires()->create(['user_id' => $auteur->id, 'contenu' => $texte]);
+                $date = now()->subHours($ilYa);
+                $commentaire->forceFill(['created_at' => $date, 'updated_at' => $date])->saveQuietly();
+
+                // "J'aime" des autres citoyens (jamais l'auteur lui-même)
+                $fans = $citoyens->where('id', '!=', $auteur->id)->take($nbLikes)->pluck('id');
+                $commentaire->likes()->attach($fans);
             }
         }
     }
