@@ -45,6 +45,12 @@ class ReseauEau extends Model
         ];
     }
 
+    // RESEAU_EAU 1 — N COUPURE_PROGRAMMEE (travaux planifiés)
+    public function coupures(): HasMany
+    {
+        return $this->hasMany(CoupureProgrammee::class, 'reseau_eau_id');
+    }
+
     // Chaque création ou changement d'état est enregistré dans l'historique
     protected static function booted(): void
     {
