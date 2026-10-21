@@ -40,8 +40,10 @@ RUN composer dump-autoload --no-dev --optimize --no-scripts
 # =========================================================
 FROM base AS test
 
-RUN pecl install pcov && docker-php-ext-enable pcov
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# PCOV : couverture de code pour SonarQube (3 essais si pecl.php.net ne répond pas)
+RUN pecl channel-update pecl.php.net || true; \
+    for essai in 1 2 3; do pecl install pcov && break || sleep 15; done \
+    && docker-php-ext-enable pcovCOPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY composer.json composer.lock ./
