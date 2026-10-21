@@ -7,13 +7,13 @@ use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIStatusException;
 use Anthropic\Core\Exceptions\AuthenticationException;
 use Anthropic\Core\Exceptions\RateLimitException;
+use App\Exceptions\ServiceIAException;
 use App\Models\ReseauEau;
 use App\Models\Zone;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
-use App\Exceptions\ServiceIAException;
 
 /*
  * Rapport d'analyse d'une zone rédigé par l'IA.
@@ -49,7 +49,8 @@ class AnalyseZoneIA
     /**
      * @return array{html: string, genereLe: string, modele: string}
      *
-     * @throws ServiceIAException avec un message lisible par le gestionnaire     */
+     * @throws ServiceIAException avec un message lisible par le gestionnaire
+     */
     public static function analyser(Zone $zone): array
     {
         $fournisseur = self::fournisseur();
@@ -310,48 +311,6 @@ class AnalyseZoneIA
                 betas: ['server-side-fallback-2026-07-01'],
             );
         } catch (AuthenticationException) {
-            throw new RuntimeException("La clé ANTHROPIC_API_KEY est invalide : vérifiez-la dans le fichier .env.");
-        } catch (RateLimitException) {
-            throw new RuntimeException("Trop de demandes envoyées à l'IA : réessayez dans une minute.");
-        } catch (APIConnectionException) {
-            throw new RuntimeException("Impossible de joindre le service d'IA : vérifiez la connexion Internet du serveur.");
-        } catch (APIStatusException $e) {
-            Log::warning('Analyse IA : erreur API', ['type' => $e->type?->value, 'message' => $e->getMessage()]);
-            throw new RuntimeException("Le service d'IA a renvoyé une erreur. Réessayez plus tard.");
-        }
-
-        if ($reponse->stopReason === 'refusal') {
-            throw new RuntimeException("L'IA n'a pas pu analyser cette zone. Réessayez plus tard.");
-        }
-
-        $texte = collect($reponse->content)
-            ->filter(fn ($bloc) => $bloc->type === 'text')
-            ->map(fn ($bloc) => $bloc->text)
-            ->implode("\n");
-
-        if (blank($texte)) {
-            throw new RuntimeException("L'IA n'a renvoyé aucun texte. Réessayez.");
-        }
-
-        return self::resultatIA($texte, (string) $reponse->model);
-    }    private static function appelerClaude(array $donnees): array
-    {
-        $cleApi = config('services.anthropic.key');
-        $modele = config('services.anthropic.model');
-        $client = new Client(apiKey: $cleApi);
-
-        try {
-            $reponse = $client->beta->messages->create(
-                model: $modele,
-                maxTokens: 16000,
-                system: self::SYSTEME,
-                messages: [['role' => 'user', 'content' => self::consigne($donnees)]],
-                outputConfig: ['effort' => 'medium'],
-                // Si le modèle refuse la demande, l'API la relance automatiquement sur un modèle de secours
-                fallbacks: 'default',
-                betas: ['server-side-fallback-2026-07-01'],
-            );
-        } catch (AuthenticationException) {
             throw new ServiceIAException("La clé ANTHROPIC_API_KEY est invalide : vérifiez-la dans le fichier .env.");
         } catch (RateLimitException) {
             throw new ServiceIAException("Trop de demandes envoyées à l'IA : réessayez dans une minute.");
@@ -377,5 +336,4 @@ class AnalyseZoneIA
 
         return self::resultatIA($texte, (string) $reponse->model);
     }
-}
 }
