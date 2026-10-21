@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
+use App\Exceptions\ServiceIAException;
 
 /*
  * Rapport d'analyse d'une zone rédigé par l'IA.
@@ -61,24 +62,20 @@ class AnalyseZoneIA
 
         $donnees = self::donnees($zone);
 
-        // Même données = même rapport : on évite de refaire un appel identique (et de consommer le quota)
+        // Même données = même rapport : on évite de refaire un appel identique (et de consommer le quota).
+        // Cache::remember ne met rien en cache si l'appel échoue : seul un vrai rapport est gardé 24 h.
         $cle = 'analyse-zone:' . $fournisseur . ':' . $zone->id . ':' . hash('sha256', json_encode($donnees));
-        if ($rapport = Cache::get($cle)) {
-            return $rapport;
-        }
 
         try {
-            $rapport = $fournisseur === 'groq' ? self::appelerGroq($donnees) : self::appelerClaude($donnees);
+            return Cache::remember($cle, now()->addDay(), fn () => $fournisseur === 'groq'
+                ? self::appelerGroq($donnees)
+                : self::appelerClaude($donnees));
         } catch (RuntimeException $e) {
             // IA indisponible (quota, réseau, clé…) : on affiche quand même le rapport de secours, en le signalant
             Log::warning('Analyse IA de zone indisponible', ['fournisseur' => $fournisseur, 'raison' => $e->getMessage()]);
 
             return self::rapportDemo($zone) + ['avertissement' => $e->getMessage()];
         }
-
-        Cache::put($cle, $rapport, now()->addDay());   // seul un vrai rapport est mis en cache
-
-        return $rapport;
     }
 
     // Fournisseur d'IA utilisé : groq, anthropic, ou demo (aucune clé)
@@ -250,16 +247,16 @@ class AnalyseZoneIA
 
         match (true) {
             $reponse->successful()     => null,
-            $reponse->status() === 401 => throw new RuntimeException('La clé GROQ_API_KEY est invalide : vérifiez-la dans le fichier .env.'),
-            $reponse->status() === 429 => throw new RuntimeException("Quota gratuit de l'IA atteint : réessayez dans une minute."),
-            default                    => throw new RuntimeException("Le service d'IA a renvoyé une erreur ({$reponse->status()})."),
+            $reponse->status() === 401 => throw new ServiceIAException('La clé GROQ_API_KEY est invalide : vérifiez-la dans le fichier .env.'),
+            $reponse->status() === 429 => throw new ServiceIAException("Quota gratuit de l'IA atteint : réessayez dans une minute."),
+            default                    => throw new ServiceIAException("Le service d'IA a renvoyé une erreur ({$reponse->status()})."),
         };
 
         $choix = $reponse->json('choices.0');
         $texte = trim((string) ($choix['message']['content'] ?? ''));
 
         if (($choix['finish_reason'] ?? null) === 'length' || $texte === '') {
-            throw new RuntimeException("La réponse de l'IA est vide ou incomplète.");
+            throw new ServiceIAException("La réponse de l'IA est vide ou incomplète.");
         }
 
         return self::resultatIA($texte, ($reponse->json('model') ?? $modele) . ' (Groq)');

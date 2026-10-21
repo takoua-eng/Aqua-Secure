@@ -24,10 +24,11 @@
                 </p>
             </div>
             @if ($zone)
-                <div class="ms-auto btn-group" role="group">
+                <fieldset class="ms-auto btn-group">
+                    <legend class="visually-hidden">Coupures affichées</legend>
                     <a href="{{ route('coupures.index') }}" class="btn btn-sm {{ $toutes ? 'btn-outline-primary' : 'btn-primary' }}">Ma zone</a>
                     <a href="{{ route('coupures.index', ['toutes' => 1]) }}" class="btn btn-sm {{ $toutes ? 'btn-primary' : 'btn-outline-primary' }}">Toutes les zones</a>
-                </div>
+                </fieldset>
             @endif
         </div>
 
